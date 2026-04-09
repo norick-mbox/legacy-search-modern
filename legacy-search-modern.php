@@ -725,6 +725,13 @@ class WPCustomFieldsSearchPlugin
 require_once plugin_dir_path(__FILE__) . 'includes/class-legacy-importer.php';
 
 register_activation_hook(__FILE__, function () {
+
+    include_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+    if (is_plugin_active('wp-custom-fields-search/plugin.php')) {
+        deactivate_plugins('wp-custom-fields-search/plugin.php');
+    }
+
     LSM_Legacy_Importer::maybe_import();
 });
 

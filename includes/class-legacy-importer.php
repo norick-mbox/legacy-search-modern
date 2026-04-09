@@ -3,6 +3,14 @@
 if (!defined('ABSPATH')) {
     exit;
 }
+if (!defined('LSM_OPTION_NAME')) {
+    define('LSM_OPTION_NAME', 'legacy_search_modern_options');
+}
+
+if (!defined('LSM_LEGACY_OPTION_KEY')) {
+    define('LSM_LEGACY_OPTION_KEY', 'wp_custom_fields_search');
+}
+
 
 class LSM_Legacy_Importer
 {
@@ -14,11 +22,16 @@ class LSM_Legacy_Importer
             return;
         }
 
-        $legacy = get_option(LSM_LEGACY_OPTION_KEY);
+        $legacy = get_option('wp_custom_fields_search_options');
 
         if (empty($legacy) || !is_array($legacy)) {
-            update_option('legacy_search_modern_imported', 1);
-            return;
+            $legacy = get_option(LSM_LEGACY_OPTION_KEY);
+        }
+
+        if (empty($legacy) || !is_array($legacy)) {
+            $legacy = array(
+                'presets' => array(),
+            );
         }
 
         $new_config = array(

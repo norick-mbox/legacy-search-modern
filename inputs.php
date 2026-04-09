@@ -1,6 +1,6 @@
 <?php
 	class WPCustomFieldsSearch_TextBoxInput extends WPCustomFieldsSearch_Input {
-		var $template = "text";
+		public string $template = 'text';
 		function get_editor_options(){
 			$options = parent::get_editor_options();
 			$options['extra_config_form'] = plugin_dir_url(__FILE__).'ng/partials/inputs/textbox.html';
@@ -9,9 +9,10 @@
 		}
 		function get_submitted_value($options,$data){
 			$html_name="f".$options['index'];
-			$value = $data[$html_name];
+			$value = isset($data[$html_name]) ? $data[$html_name] : '';
+
             if(array_key_exists('split_words',$options) && $options['split_words']){
-                return array_filter(explode(" ",$value),"strlen");
+                return array_values(array_filter(explode(' ', $value), 'strlen'));
             } else {
                 return array($value);
             }
@@ -45,7 +46,7 @@
 		}
 
 		function render($config,$query){
-			if($config['source']=='Auto'){
+			if (isset($config['source']) && $config['source'] === 'Auto') {
                 try {
                     $datatype = wpcfs_instantiate_class($config['datatype']);
                     $config['options'] = array_merge(array(array("value"=>"","label"=>$config['any_message'])),$datatype->get_suggested_values($config));
@@ -75,7 +76,7 @@
 		}
 
 		function render($config,$query){
-			if($config['source']=='Auto'){
+			if (isset($config['source']) && $config['source'] === 'Auto') {
                 try {
                     $datatype = wpcfs_instantiate_class($config['datatype']);
                     $config['options'] = $datatype->get_suggested_values($config);
@@ -87,7 +88,7 @@
 		}
 	}
 	class WPCustomFieldsSearch_HiddenInput extends WPCustomFieldsSearch_Input {
-        var $show_in_form = false;
+        public bool $show_in_form = false;
 
 		function get_editor_options(){
 			$options = parent::get_editor_options();
