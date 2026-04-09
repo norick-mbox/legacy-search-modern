@@ -33,7 +33,7 @@
                 try {
                     $config['class'] = wpcfs_instantiate_class($clsname);
                 } catch(WPCustomFieldsSearchClassException $e){
-                    error_log("WP Custom Fields Search - search_form.php ".$e->getMessage());
+                    error_log("Legacy Search Modern - search_form.php ".$e->getMessage());
                     continue;
                 }
                 $config['index'] = ++$index;

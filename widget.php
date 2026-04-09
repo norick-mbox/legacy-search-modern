@@ -18,17 +18,17 @@ require_once(dirname(__FILE__).'/functions.php');
 
 class WPCustomFieldsSearchWidget extends WP_Widget {
 	function __construct(){
-		parent::__construct('wp_custom_fields_search',
-			__("WPCFS Custom Search Form","wp_custom_fields_search" ,"wp_custom_fields_search"),
+		parent::__construct('legacy-search-modern',
+			__("Customisable search form for Legacy Search Modern", "legacy-search-modern"),
 			array(
-				"description"=>__("Customisable search form (from WP Custom Fields Search)","wp_custom_fields_search","wp_custom_fields_search")
+				"description" => __("Customisable search form for Legacy Search Modern", "legacy-search-modern")
 			)
 		);
 	}
 
 
     function get_query_if_submitted($instance){
-        if($_GET['wpcfs']==$instance['widget_id']){
+        if (!empty($_GET['wpcfs']) && $_GET['wpcfs'] === $instance['widget_id']) {
             return $_GET;
         }
     }   
@@ -64,11 +64,11 @@ class WPCustomFieldsSearchWidget extends WP_Widget {
 		// TODO: Could this be implemented with is_active_sidebar???
 		if($this->number=="__i__"){
 			echo "
-				<div id='$form_id' class='wp_custom_fields_search-form'>
+				<div id='$form_id' class='legacy-search-modern-form'>
 				</div>
 				<script>
                     var configure_forms = function(){
-                        jQuery('.wp_custom_fields_search-form:not(.wp_custom_fields_search_editor)').each(function(el){
+                        jQuery('.legacy-search-modern-form:not(.legacy-search-modern_editor)').each(function(el){
                             var $=jQuery;
                             var template_id = '$form_id',
                                 template_name='".$this->get_field_name('data')."',
@@ -80,7 +80,7 @@ class WPCustomFieldsSearchWidget extends WP_Widget {
                         
                             if(index=='__i__') return;
 
-                            $(this).wp_custom_fields_search_editor({
+                           $(this).wpcfs_editor({
                                 'form_config': $form_config,
                                 'building_blocks': ".json_encode(WPCustomFieldsSearchPlugin::get_javascript_editor_config()).",
                                 'settings_pages': ".json_encode($settings_pages).",
@@ -108,10 +108,10 @@ class WPCustomFieldsSearchWidget extends WP_Widget {
 			";
 		} else {
 			echo "
-				<div id='$form_id' class='wp_custom_fields_search-form'>
+				<div id='$form_id' class='legacy-search-modern-form'>
 				</div>
 				<script>
-					jQuery('#$form_id').wp_custom_fields_search_editor({
+					jQuery('#$form_id').wpcfs_editor({
 						'form_config':$form_config,
 						'building_blocks': ".json_encode(WPCustomFieldsSearchPlugin::get_javascript_editor_config()).",
                         'settings_pages': ".json_encode($settings_pages).",

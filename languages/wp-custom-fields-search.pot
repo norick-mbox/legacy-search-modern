@@ -1,8 +1,8 @@
 # Copyright (C) 2020 Don Benjamin
-# This file is distributed under the same license as the WP Custom Fields Search plugin.
+# This file is distributed under the same license as the Legacy Search Modern plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: WP Custom Fields Search 1.2.29\n"
+"Project-Id-Version: Legacy Search Modern 1.2.29\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wp-custom-fields-search\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -12,14 +12,14 @@ msgstr ""
 "POT-Creation-Date: 2020-04-29T09:14:39+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.4.0\n"
-"X-Domain: wp_custom_fields_search\n"
+"X-Domain: legacy-search-modern\n"
 
 #. Plugin Name of the plugin
-msgid "WP Custom Fields Search"
+msgid "Legacy Search Modern"
 msgstr ""
 
 #. Plugin URI of the plugin
-msgid "http://www.webhammer.co.uk/wp_custom_fields_search"
+msgid "http://www.webhammer.co.uk/legacy-search-modern"
 msgstr ""
 
 #. Description of the plugin
@@ -321,7 +321,7 @@ msgid "Search"
 msgstr ""
 
 #: templates/presets-page.php:4
-msgid "Configure WP Custom Fields Search"
+msgid "Configure Legacy Search Modern"
 msgstr ""
 
 #: templates/unsupported-message.php:6
@@ -329,7 +329,7 @@ msgid "Unsupported Browser"
 msgstr ""
 
 #: templates/unsupported-message.php:7
-msgid "This browser is no longer supported by the WP Custom Fields Search admin area, please upgrade to a more modern browser, such as <a href='https://www.mozilla.org/firefox/'>Firefox</a>, <a href='https://ww.google.com/chrome'>Chrome</a> or a version of Internet Explorer newer than 10."
+msgid "This browser is no longer supported by the Legacy Search Modern admin area, please upgrade to a more modern browser, such as <a href='https://www.mozilla.org/firefox/'>Firefox</a>, <a href='https://ww.google.com/chrome'>Chrome</a> or a version of Internet Explorer newer than 10."
 msgstr ""
 
 #: templates/unsupported-message.php:8
@@ -341,5 +341,5 @@ msgid "WPCFS Custom Search Form"
 msgstr ""
 
 #: widget.php:24
-msgid "Customisable search form (from WP Custom Fields Search)"
+msgid "Customisable search form (from Legacy Search Modern)"
 msgstr ""

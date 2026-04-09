@@ -30,7 +30,7 @@ var wpcfs_assert_supported_browser = function(){
 
     
 
-	$.widget("wpcfs.wp_custom_fields_search_editor",{
+	$.widget("wpcfs.legacy-search-modern_editor",{
 		"options":{
             "mode": "widget",
             "root_template": "form.html",
@@ -43,7 +43,7 @@ var wpcfs_assert_supported_browser = function(){
 
             if(this.options.mode=="widget"){
 
-                this.element.addClass("wp_custom_fields_search_editor");
+                this.element.addClass("legacy-search-modern_editor");
                 this.options.value_element = $("<input type='hidden' name='"+this.options.field_name+"' value=''/>").appendTo(this.element);
 
             }
@@ -90,7 +90,7 @@ var wpcfs_assert_supported_browser = function(){
 		},
 		"handlers": handler_list
 	});
-	$.wp_custom_fields_search_add_handler = function(type,name,handler){
+	$.legacy-search-modern_add_handler = function(type,name,handler){
 		handler_list[type][name] = handler;
 	};
 })(jQuery);

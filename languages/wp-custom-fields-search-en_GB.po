@@ -1,8 +1,8 @@
-# Copyright (C) 2017 WP Custom Fields Search
-# This file is distributed under the same license as the WP Custom Fields Search package.
+# Copyright (C) 2017 Legacy Search Modern
+# This file is distributed under the same license as the Legacy Search Modern package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WP Custom Fields Search 1.0.0\n"
+"Project-Id-Version: Legacy Search Modern 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wp-custom-fields-"
 "search\n"
 "POT-Creation-Date: 2017-10-13 15:36:02+00:00\n"
@@ -266,7 +266,7 @@ msgid "WPCFS Custom Search Form"
 msgstr ""
 
 #: widget.php:21
-msgid "Customisable search form (from WP Custom Fields Search)"
+msgid "Customisable search form (from Legacy Search Modern)"
 msgstr ""
 
 #: widget.php:53
@@ -278,11 +278,11 @@ msgid "Search Term"
 msgstr ""
 
 #. Plugin Name of the plugin/theme
-msgid "WP Custom Fields Search"
+msgid "Legacy Search Modern"
 msgstr ""
 
 #. Plugin URI of the plugin/theme
-msgid "http://www.webhammer.co.uk/wp_custom_fields_search"
+msgid "http://www.webhammer.co.uk/legacy-search-modern"
 msgstr ""
 
 #. Description of the plugin/theme

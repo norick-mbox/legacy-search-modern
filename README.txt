@@ -31,7 +31,7 @@ You should now see a very basic search form in that sidebar.  You can expand on 
 
 = Include a preset =
 
-1. Navigate the WP Custom Fields Search section in the menu
+1. Navigate the Legacy Search Modern section in the menu
 1. Click the "New Preset" button
 1. Add at least one field (see 'Configuring your form' below)
 1. Either copy the shortcode text into a post / page

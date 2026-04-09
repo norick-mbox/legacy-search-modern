@@ -1,17 +1,17 @@
 <?php
     class WPCustomFieldsSearch_PostField extends WPCustomFieldsSearch_DataType {
-        function get_name(){ return __("Core Post Field","wp_custom_fields_search"); }
+        function get_name(){ return __("Core Post Field","legacy-search-modern"); }
         function getFieldMap(){
             global $wpdb;
             return array(
-                "post_title"    =>    __("Title","wp_custom_fields_search"),
-                "post_author"    =>    __("Author","wp_custom_fields_search"),
-                "post_date"    =>    __("Date","wp_custom_fields_search"),
-                "post_content"    =>    __("Content","wp_custom_fields_search"),
-                "post_excerpt"    =>    __("Excerpt","wp_custom_fields_search"),
-                "post_type"    =>    __("Post Type","wp_custom_fields_search"),
-                "all"        =>    __("All","wp_custom_fields_search"),
-                "post_id"    =>    __("ID","wp_custom_fields_search"),
+                "post_title"    =>    __("Title","legacy-search-modern"),
+                "post_author"    =>    __("Author","legacy-search-modern"),
+                "post_date"    =>    __("Date","legacy-search-modern"),
+                "post_content"    =>    __("Content","legacy-search-modern"),
+                "post_excerpt"    =>    __("Excerpt","legacy-search-modern"),
+                "post_type"    =>    __("Post Type","legacy-search-modern"),
+                "all"        =>    __("All","legacy-search-modern"),
+                "post_id"    =>    __("ID","legacy-search-modern"),
             );
         }
         function getAvailableFields(){
@@ -42,7 +42,7 @@
             switch($config['datatype_field']){
                 case 'post_title': case 'post_date': case 'post_content': case 'post_excerpt': case 'all':
                     $map = $this->getFieldMap();
-                    trigger_error(__("Cannot auto-populate select for ","wp_custom_fields_search").$map[$config['datatype_field']]);
+                    trigger_error(__("Cannot auto-populate select for ","legacy-search-modern").$map[$config['datatype_field']]);
                     return array();
                 case 'post_author':
                     $q = $wpdb->get_results("SELECT GROUP_CONCAT(DISTINCT post_author) AS author FROM $wpdb->posts");
@@ -64,7 +64,7 @@
     }
 
     class WPCustomFieldsSearch_CustomField extends WPCustomFieldsSearch_DataType {
-        function get_name(){ return __("Custom Post Field","wp_custom_fields_search"); }
+        function get_name(){ return __("Custom Post Field","legacy-search-modern"); }
         function getFieldMap(){
             global $wpdb;
             $results = $wpdb->get_results("SELECT DISTINCT(meta_key) FROM $wpdb->postmeta ORDER BY meta_key");
@@ -104,7 +104,7 @@
         var $multijoin = true;
 
         function getFieldMap(){
-            return array("term_id"=>__("ID","wp_custom_fields_search"),"name"=>__("Name","wp_custom_fields_search"));
+            return array("term_id"=>__("ID","legacy-search-modern"),"name"=>__("Name","legacy-search-modern"));
         }
 
         function add_joins($config,$join,$count){
@@ -153,7 +153,7 @@
     class WPCustomFieldsSearch_CustomTaxonomy extends WPCustomFieldsSearch_TaxonomyTerm {
          var $multijoin = true;
          var $taxonomy = '';
-        function get_name(){ return __("Custom Taxonomy","wp_custom_fields_search"); }
+        function get_name(){ return __("Custom Taxonomy","legacy-search-modern"); }
 
         function getFieldMap()
         {
@@ -188,9 +188,9 @@
     }
     class WPCustomFieldsSearch_Category extends WPCustomFieldsSearch_TaxonomyTerm {
         var $taxonomy = "category";
-        function get_name(){ return __("Category Field","wp_custom_fields_search"); }
+        function get_name(){ return __("Category Field","legacy-search-modern"); }
     }
     class WPCustomFieldsSearch_Tag extends WPCustomFieldsSearch_TaxonomyTerm {
         var $taxonomy = "post_tag";
-        function get_name(){ return __("Tag","wp_custom_fields_search"); }
+        function get_name(){ return __("Tag","legacy-search-modern"); }
     }

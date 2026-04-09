@@ -1,10 +1,10 @@
 <?php 
 
 class WPCustomFieldsSearch_Equals extends WPCustomFieldsSearch_Comparison {
-    function get_name(){ return __("Exact Match","wp_custom_fields_search"); }
+    function get_name(){ return __("Exact Match","legacy-search-modern"); }
 }
 class WPCustomFieldsSearch_TextIn extends WPCustomFieldsSearch_Comparison {
-    function get_name(){ return __("Contains Text","wp_custom_fields_search"); }
+    function get_name(){ return __("Contains Text","legacy-search-modern"); }
 
 	function get_where($config,$value,$field_alias){
 		return $field_alias." LIKE '%".wpcfs_escape_string($value)."%'";
@@ -31,14 +31,14 @@ class WPCustomFieldsSearch_OrderedComparison extends WPCustomFieldsSearch_Compar
 	}
 }
 class WPCustomFieldsSearch_GreaterThan extends WPCustomFieldsSearch_OrderedComparison {
-    function get_name(){ return __("Greater Than","wp_custom_fields_search"); }
+    function get_name(){ return __("Greater Than","legacy-search-modern"); }
 	function get_where($config,$value,$field_alias){
         $comparison = $config['inclusive'] ? ">=" : ">";
         return $this->get_ordered_where($config,$value,$field_alias,$comparison);
 	}
 }
 class WPCustomFieldsSearch_LessThan extends WPCustomFieldsSearch_OrderedComparison {
-    function get_name(){ return __("Less Than","wp_custom_fields_search"); }
+    function get_name(){ return __("Less Than","legacy-search-modern"); }
 
 	function get_where($config,$value,$field_alias){
         $comparison = $config['inclusive'] ? "<=" : "<";
@@ -46,7 +46,7 @@ class WPCustomFieldsSearch_LessThan extends WPCustomFieldsSearch_OrderedComparis
 	}
 }
 class WPCustomFieldsSearch_Range extends WPCustomFieldsSearch_OrderedComparison {
-    function get_name(){ return __("In Range","wp_custom_fields_search"); }
+    function get_name(){ return __("In Range","legacy-search-modern"); }
 
 	function get_where($config,$value,$field_alias){
 		$range = explode(":",$value);
@@ -76,7 +76,7 @@ class WPCustomFieldsSearch_Range extends WPCustomFieldsSearch_OrderedComparison 
 }
 
 class WPCustomFieldsSearch_SubCategoryOf extends WPCustomFieldsSearch_Comparison {
-    function get_name(){ return __("In category or Sub-category","wp_custom_fields_search"); }
+    function get_name(){ return __("In category or Sub-category","legacy-search-modern"); }
 
     function get_editor_options(){
         return array_merge(parent::get_editor_options(),array(

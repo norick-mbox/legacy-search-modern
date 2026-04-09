@@ -1,5 +1,5 @@
 (function($){
-	$.wp_custom_fields_search_add_handler("input","select_handler",function(main_ui,instance_config,type_config,save){
+	$.legacy-search-modern_add_handler("input","select_handler",function(main_ui,instance_config,type_config,save){
 		instance_config = $.extend({ 
 				"source": "Auto",
 				"allow_blank":true,

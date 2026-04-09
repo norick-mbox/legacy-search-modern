@@ -21,7 +21,7 @@
 	<?php } ?>
 
 <div class='wpcfs-input-wrapper wpcfs-input-submit'>
-    <input type='submit' value='<?php echo __("Search","wp_custom_fields_search")?>'>
+    <input type='submit' value='<?php echo __("Search","legacy-search-modern")?>'>
 </div>
 
 <?php echo $hidden; ?>
