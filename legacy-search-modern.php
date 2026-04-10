@@ -399,6 +399,7 @@ class WPCustomFieldsSearchPlugin
                 'save_nonce' => wp_create_nonce('wpcfs_save_preset'),
                 'delete_nonce' => wp_create_nonce('wpcfs_delete_preset'),
                 'export_nonce' => wp_create_nonce('wpcfs_export_settings'),
+                'importNonce' => wp_create_nonce('legacy_search_modern_import'),
             )
         );
 
@@ -775,9 +776,26 @@ register_activation_hook(__FILE__, function () {
 
     if (is_plugin_active('wp-custom-fields-search/plugin.php')) {
         deactivate_plugins('wp-custom-fields-search/plugin.php');
-    }
 
-    LSM_Legacy_Importer::maybe_import();
+        set_transient(
+            'legacy_search_modern_deactivated_old_plugin',
+            true,
+            60
+        );
+    }
+});
+add_action('admin_notices', function () {
+
+    if (get_transient('legacy_search_modern_deactivated_old_plugin')) {
+        delete_transient('legacy_search_modern_deactivated_old_plugin');
+
+        echo '<div class="notice notice-warning is-dismissible"><p>';
+        echo esc_html__(
+            'WP Custom Fields Search has been deactivated automatically to avoid conflicts. You can import its settings below.',
+            'legacy-search-modern'
+        );
+        echo '</p></div>';
+    }
 });
 
 WPCustomFieldsSearchPlugin::getInstance();
@@ -791,3 +809,29 @@ if (!function_exists('wp_custom_fields_search')) {
         return wpcfs_show_preset($id);
     }
 }
+
+add_action('wp_ajax_legacy_search_modern_import', function () {
+
+    check_ajax_referer('legacy_search_modern_import');
+
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error('permission');
+    }
+
+    require_once plugin_dir_path(__FILE__) . 'includes/class-legacy-importer.php';
+
+    // 再インポートできるように imported フラグを一旦削除
+    delete_option('legacy_search_modern_imported');
+
+    LSM_Legacy_Importer::maybe_import();
+
+    $result = get_option(LSM_OPTION_NAME);
+
+    if (empty($result) || empty($result['presets'])) {
+        wp_send_json_error('import_failed');
+    }
+
+    wp_send_json_success(array(
+        'count' => count($result['presets']),
+    ));
+});

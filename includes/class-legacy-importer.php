@@ -22,7 +22,7 @@ class LSM_Legacy_Importer
             return;
         }
 
-        $legacy = get_option('wp_custom_fields_search_options');
+        $legacy = get_option('wp_custom_fields_search');
 
         if (empty($legacy) || !is_array($legacy)) {
             $legacy = get_option(LSM_LEGACY_OPTION_KEY);
