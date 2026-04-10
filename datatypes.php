@@ -14,7 +14,7 @@ class WPCustomFieldsSearch_PostField extends WPCustomFieldsSearch_DataType
             "post_excerpt" => __("Excerpt", "legacy-search-modern"),
             "post_type" => __("Post Type", "legacy-search-modern"),
             "all" => __("All", "legacy-search-modern"),
-            "post_id" => __("ID", "legacy-search-modern"),
+            "ID" => __("ID", "legacy-search-modern"),
         );
     }
     public function getAvailableFields()
@@ -28,15 +28,17 @@ class WPCustomFieldsSearch_PostField extends WPCustomFieldsSearch_DataType
     }
     public function get_field_aliases($config, $count)
     {
-        if ($config['datatype_field'] == 'all') {
+        if ($config['datatype_field'] === 'all') {
             $aliases = array();
-            foreach (array('post_title', 'post_author', 'post_content') as $field) {
+
+            foreach (array('post_title', 'post_content', 'post_excerpt') as $field) {
                 $aliases[] = $this->get_field_alias($config, $field, $count);
             }
+
             return $aliases;
-        } else {
-            return parent::get_field_aliases($config, $count);
         }
+
+        return parent::get_field_aliases($config, $count);
     }
     public function get_field_alias($config, $field_name, $count = 0)
     {
@@ -67,7 +69,28 @@ class WPCustomFieldsSearch_PostField extends WPCustomFieldsSearch_DataType
     public function get_editor_options()
     {
         $options = parent::get_editor_options();
-        $options['defaults'] = array("datatype_field" => "all");
+
+        $options['labels'] = array(
+            'text',
+            'numeric',
+            'date',
+        );
+
+        $options['field_labels'] = array(
+            'post_title' => array('text'),
+            'post_content' => array('text'),
+            'post_excerpt' => array('text'),
+            'all' => array('text'),
+            'post_type' => array('text'),
+            'post_author' => array('numeric'),
+            'ID' => array('numeric'),
+            'post_date' => array('date'),
+        );
+
+        $options['defaults'] = array(
+            'datatype_field' => 'post_title',
+        );
+
         return $options;
     }
 }

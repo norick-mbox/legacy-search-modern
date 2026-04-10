@@ -186,7 +186,6 @@ class WPCustomFieldsSearchPlugin
                 foreach ($input['datatype']->get_field_aliases($input, $submitted_index) as $alias) {
                     $sub_wheres[] = $input['comparison']->get_where($input, $value, $alias);
                 }
-
                 $wheres[] = "(" . join(" OR ", $sub_wheres) . ")";
 
                 if ($isMulti) {

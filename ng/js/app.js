@@ -81,6 +81,79 @@ angular.module('WPCFS')
                 var datatype_options = $scope.datatypes[$scope.field.datatype];
                 $scope.fields = datatype_options ? datatype_options.options.all_fields : [];
             });
+            $scope.$watchGroup(['field.datatype', 'field.datatype_field'], function () {
+
+                if ($scope.field.datatype !== 'WPCustomFieldsSearch_PostField') {
+                    return;
+                }
+
+                switch ($scope.field.datatype_field) {
+
+                    case 'post_title':
+                    case 'post_content':
+                    case 'post_excerpt':
+                    case 'all':
+                        $scope.field.input = 'WPCustomFieldsSearch_TextBoxInput';
+                        $scope.field.comparison = 'WPCustomFieldsSearch_TextIn';
+                        break;
+
+                    case 'post_type':
+                    case 'post_author':
+                        if (
+                            $scope.field.input !== 'WPCustomFieldsSearch_SelectInput' &&
+                            $scope.field.input !== 'WPCustomFieldsSearch_TextBoxInput'
+                        ) {
+                            $scope.field.input = 'WPCustomFieldsSearch_SelectInput';
+                        }
+
+                        $scope.field.comparison = 'WPCustomFieldsSearch_Equals';
+                        break;
+
+                    case 'ID':
+                        $scope.field.input = 'WPCustomFieldsSearch_TextBoxInput';
+                        $scope.field.comparison = 'WPCustomFieldsSearch_Equals';
+                        break;
+                }
+
+                $scope.valid_comparisons = $scope.get_valid_comparisons();
+            });
+            $scope.get_valid_inputs = function () {
+                var inputs = [];
+
+                angular.forEach($scope.config.building_blocks.inputs, function (input) {
+                    var valid = true;
+
+                    if ($scope.field.datatype === 'WPCustomFieldsSearch_PostField') {
+                        switch ($scope.field.datatype_field) {
+
+                            case 'post_title':
+                            case 'post_content':
+                            case 'post_excerpt':
+                            case 'all':
+                                valid = (input.id === 'WPCustomFieldsSearch_TextBoxInput');
+                                break;
+
+                            case 'post_type':
+                            case 'post_author':
+                                valid = (
+                                    input.id === 'WPCustomFieldsSearch_SelectInput' ||
+                                    input.id === 'WPCustomFieldsSearch_TextBoxInput'
+                                );
+                                break;
+
+                            case 'ID':
+                                valid = (input.id === 'WPCustomFieldsSearch_TextBoxInput');
+                                break;
+                        }
+                    }
+
+                    if (valid) {
+                        inputs.push(input);
+                    }
+                });
+
+                return inputs;
+            };
 
             $scope.get_valid_comparisons = function () {
                 var comparisons = [];
@@ -94,9 +167,21 @@ angular.module('WPCFS')
                                 angular.forEach(restrictions, function (value) {
                                     switch (type) {
                                         case 'datatype':
-                                            var datatype = $scope.config.building_blocks.datatypes.find(function (element) { return element.id == $scope.field.datatype });
-                                            if (datatype && datatype.options.labels) {
-                                                valid = valid && (datatype.options.labels.indexOf(value) > -1);
+                                            var datatype = $scope.config.building_blocks.datatypes.find(function (element) {
+                                                return element.id == $scope.field.datatype;
+                                            });
+
+                                            if (datatype) {
+                                                var labels = datatype.options.labels || [];
+
+                                                if (
+                                                    datatype.options.field_labels &&
+                                                    datatype.options.field_labels[$scope.field.datatype_field]
+                                                ) {
+                                                    labels = datatype.options.field_labels[$scope.field.datatype_field];
+                                                }
+
+                                                valid = valid && (labels.indexOf(value) > -1);
                                             }
                                             else valid = false;
                                             break;
