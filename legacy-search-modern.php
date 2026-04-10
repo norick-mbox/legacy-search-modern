@@ -268,8 +268,8 @@ class WPCustomFieldsSearchPlugin
             $found[] = $input['comparison']->describe($label, $value);
         }
         $join = (@$input['multi_match'] == "Any")
-? __(" or ", "legacy-search-modern")
-: __(" &amp; ", "legacy-search-modern");
+        ? __(" or ", "legacy-search-modern")
+        : __(" &amp; ", "legacy-search-modern");
 
         return implode(" $join ", $found);
     }
@@ -330,38 +330,84 @@ class WPCustomFieldsSearchPlugin
             $angular_dependencies[] = $library["name"];
         }
         wp_enqueue_script(
-            "wpcfs-editor",
-            plugin_dir_url(__FILE__) . 'js/wp-custom-fields-search-editor.js',
-            array('jquery', 'jquery-ui-core', 'jquery-ui-widget', 'jquery-ui-sortable', 'angularjs', 'ng-sortable')
+            'angularjs',
+            plugin_dir_url(__FILE__) . 'js/angular.min.js',
+            array('jquery'),
+            '1.5.11',
+            true
         );
+
         wp_enqueue_script(
-            "wpcfs-angular-dependencies",
-            '/wp-admin/admin-ajax.php?action=wpcfs_angular_dependencies',
-            $angular_dependencies
+            'ng-sortable',
+            plugin_dir_url(__FILE__) . 'ng/lib/ui-sortable.js',
+            array('angularjs'),
+            filemtime(plugin_dir_path(__FILE__) . 'ng/lib/ui-sortable.js'),
+            true
         );
+
         wp_enqueue_script(
-            "wpcfs-angular-services",
+            'wpcfs-services',
             plugin_dir_url(__FILE__) . 'ng/js/services.js',
-            array('wpcfs-editor', 'wpcfs-angular-dependencies')
+            array('angularjs'),
+            filemtime(plugin_dir_path(__FILE__) . 'ng/js/services.js'),
+            true
         );
+
         wp_enqueue_script(
-            "wpcfs-angular-app",
+            'wpcfs-app',
             plugin_dir_url(__FILE__) . 'ng/js/app.js',
-            array('wpcfs-editor', 'wpcfs-angular-services')
+            array('angularjs', 'wpcfs-services', 'ng-sortable'),
+            filemtime(plugin_dir_path(__FILE__) . 'ng/js/app.js'),
+            true
         );
+
         wp_enqueue_script(
-            "wp-handlers",
+            'wpcfs-editor',
+            plugin_dir_url(__FILE__) . 'js/wp-custom-fields-search-editor.js',
+            array(
+                'jquery',
+                'jquery-ui-core',
+                'jquery-ui-widget',
+                'jquery-ui-mouse',
+                'jquery-ui-sortable',
+                'jquery-ui-draggable',
+                'angularjs',
+                'wpcfs-app',
+            ),
+            filemtime(plugin_dir_path(__FILE__) . 'js/wp-custom-fields-search-editor.js'),
+            true
+        );
+
+        wp_enqueue_script(
+            'wp-handlers',
             plugin_dir_url(__FILE__) . 'js/wp-handlers.js',
-            array('wpcfs-editor')
+            array('wpcfs-editor'),
+            filemtime(plugin_dir_path(__FILE__) . 'js/wp-handlers.js'),
+            true
         );
-        wp_enqueue_script(
-            "tether",
-            plugin_dir_url(__FILE__) . "js/tether.min.js"
+        $config = get_option(LSM_OPTION_NAME, array(
+            'presets' => array(),
+        ));
+
+        wp_localize_script(
+            'wp-handlers',
+            'wpcfsAdmin',
+            array(
+                'root' => plugin_dir_url(__FILE__),
+                'presets' => $config['presets'],
+                'editor_config' => self::get_javascript_editor_config(),
+                'settings_pages' => apply_filters('wpcfs_settings_pages', array()),
+                'save_nonce' => wp_create_nonce('wpcfs_save_preset'),
+                'delete_nonce' => wp_create_nonce('wpcfs_delete_preset'),
+                'export_nonce' => wp_create_nonce('wpcfs_export_settings'),
+            )
         );
-        wp_enqueue_script(
-            "bootstrap",
-            plugin_dir_url(__FILE__) . "js/bootstrap.min.js",
-            array("tether")
+
+        wp_enqueue_style(
+            'wpcfs-editor-style',
+            plugin_dir_url(__FILE__) . 'ng/css/editor.css',
+            array(),
+            filemtime(plugin_dir_path(__FILE__) . 'ng/css/editor.css')
         );
 
         wp_register_style('wpcfs_css', plugin_dir_url(__FILE__) . 'ng/css/editor.css', false, '1.0.0');

@@ -30,7 +30,7 @@ var wpcfs_assert_supported_browser = function(){
 
     
 
-	$.widget("wpcfs.legacy-search-modern_editor",{
+  $.widget("wpcfs.wpcfs_editor", {
 		"options":{
             "mode": "widget",
             "root_template": "form.html",
@@ -43,7 +43,7 @@ var wpcfs_assert_supported_browser = function(){
 
             if(this.options.mode=="widget"){
 
-                this.element.addClass("legacy-search-modern_editor");
+              this.element.addClass("wpcfs_editor");
                 this.options.value_element = $("<input type='hidden' name='"+this.options.field_name+"' value=''/>").appendTo(this.element);
 
             }
@@ -74,7 +74,7 @@ var wpcfs_assert_supported_browser = function(){
 
 				angular.module('WPCFS')
 				.controller('RootController', ['$scope', function ($scope) {
-					$scope.root = widget.options.root+"ng/"; //TODO: Feed this in from WP
+          $scope.root = widget.options.root + "ng/"; //TODO: Feed this in from WP
     
 					$scope.partials = $scope.root+"partials/";
 					$scope.config = widget.options;
@@ -90,7 +90,7 @@ var wpcfs_assert_supported_browser = function(){
 		},
 		"handlers": handler_list
 	});
-	$.legacy-search-modern_add_handler = function(type,name,handler){
+  $.wpcfs_add_handler = function (type, name, handler) {
 		handler_list[type][name] = handler;
 	};
 })(jQuery);

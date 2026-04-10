@@ -68,7 +68,7 @@ class WPCustomFieldsSearchWidget extends WP_Widget {
 				</div>
 				<script>
                     var configure_forms = function(){
-                        jQuery('.legacy-search-modern-form:not(.legacy-search-modern_editor)').each(function(el){
+                        jQuery('.legacy-search-modern-form:not(.wpcfs_editor)').each(function(el){
                             var $=jQuery;
                             var template_id = '$form_id',
                                 template_name='".$this->get_field_name('data')."',

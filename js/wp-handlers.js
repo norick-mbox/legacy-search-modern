@@ -1,5 +1,5 @@
 (function($){
-	$.legacy-search-modern_add_handler("input","select_handler",function(main_ui,instance_config,type_config,save){
+	$.wpcfs_add_handler("input", "select_handler", function (main_ui, instance_config, type_config, save) {
 		instance_config = $.extend({ 
 				"source": "Auto",
 				"allow_blank":true,
@@ -44,3 +44,31 @@
 
 	});
  })(jQuery);
+
+ 
+jQuery(function ($) {
+	var $editor = $('#wpcfs-presets-page');
+
+	if (!$editor.length) {
+		return;
+	}
+
+	$editor.wpcfs_editor({
+		mode: 'presets',
+		root_template: 'presets.html',
+
+		form_config: window.wpcfsAdmin.presets,
+		building_blocks: window.wpcfsAdmin.editor_config,
+		settings_pages: window.wpcfsAdmin.settings_pages,
+
+		root: window.wpcfsAdmin.root,
+
+		save_callback: 'wpcfs_save_preset',
+		delete_callback: 'wpcfs_delete_preset',
+		export_callback: 'wpcfs_export_settings',
+
+		save_nonce: window.wpcfsAdmin.save_nonce,
+		delete_nonce: window.wpcfsAdmin.delete_nonce,
+		export_nonce: window.wpcfsAdmin.export_nonce
+	});
+});

@@ -31,7 +31,7 @@
 
 	class WPCustomFieldsSearch_SelectInput extends WPCustomFieldsSearch_Input {
         function get_name(){ return __("Drop Down","legacy-search-modern"); }
-		var $template = "select";
+		public string $template = "select";
 		function get_editor_options(){
 			$options = parent::get_editor_options();
 			$options['extra_config_form'] = plugin_dir_url(__FILE__).'ng/partials/inputs/select.html';
@@ -59,11 +59,11 @@
 	}
 	class WPCustomFieldsSearch_RadioButtons extends WPCustomFieldsSearch_SelectInput {
         function get_name(){ return __("Radio Buttons","legacy-search-modern"); }
-		var $template = "radio-buttons";
+		public string $template = "radio-buttons";
     }
 	class WPCustomFieldsSearch_CheckboxInput extends WPCustomFieldsSearch_Input {
         function get_name(){ return __("Checkboxes","legacy-search-modern"); }
-		var $template = "checkbox";
+		public string $template = "checkbox";
 		function get_editor_options(){
 			$options = parent::get_editor_options();
 			$options['extra_config_form'] = plugin_dir_url(__FILE__).'ng/partials/inputs/checkbox.html';

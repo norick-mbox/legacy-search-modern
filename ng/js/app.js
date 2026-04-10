@@ -11,13 +11,19 @@ angular.module('WPCFS')
         $scope.min_height = min_height + 100;
     };
     $scope.settings_visible = false;
-    $scope.datatypes  = array2dict($scope.config.building_blocks.datatypes); 
-    $scope.inputs  = array2dict($scope.config.building_blocks.inputs);
-    $scope.comparisons  = array2dict($scope.config.building_blocks.comparisons); 
+    $scope.datatypes = array2dict($scope.config.building_blocks.datatypes);
+    $scope.inputs = array2dict($scope.config.building_blocks.inputs);
+    $scope.comparisons = array2dict($scope.config.building_blocks.comparisons);
+    var pull_config = function () {
+        if (!$scope.config.form_config.inputs) {
+            $scope.config.form_config.inputs = [];
+        }
 
-    var pull_config = function(){
+        if (!$scope.config.form_config.settings) {
+            $scope.config.form_config.settings = {};
+        }
+
         $scope.form_fields = $scope.config.form_config.inputs;
-        if(!$scope.config.form_config.settings) $scope.config.form_config.settings = {};
         $scope.settings = $scope.config.form_config.settings;
     };
     pull_config();
@@ -78,7 +84,7 @@ angular.module('WPCFS')
 
         $scope.get_valid_comparisons = function(){
             var comparisons = [];
-            angular.forEach($scope.config.building_blocks.comparisons,
+            angular.forEach($scope.config.comparisons,
                 function(comparison){
                     var valid = true;
                     if(!comparison['options']){
@@ -88,7 +94,7 @@ angular.module('WPCFS')
                             angular.forEach(restrictions,function(value){
                                 switch(type){
                                     case 'datatype':
-                                        var datatype = $scope.config.building_blocks.datatypes.find(function(element){ return element.id==$scope.field.datatype});
+                                        var datatype = $scope.config.datatypes.find(function(element){ return element.id==$scope.field.datatype});
                                         if(datatype && datatype.options.labels){
                                             valid = valid && (datatype.options.labels.indexOf(value)>-1);
                                         }
@@ -149,7 +155,7 @@ angular.module('WPCFS')
         return $scope.expanded == page;
     };
 	i18n.dict().then(function(__){
-		$scope.post_type_options = $scope.config.building_blocks.general.post_types.reduce(
+        $scope.post_type_options = $scope.config.general.post_types.reduce(
 			function(combined, post_type) {
 				combined[post_type] = post_type;
 				return combined;
@@ -207,14 +213,15 @@ angular.module('WPCFS')
             return preset.settings.form_title || preset.name || __("Untitled Preset");
        };
        $scope.add_preset = function(){
-            var preset = {
-                "name": __("Untitled Preset"),
-                "unsaved": true,
-                "id": 1,
-                "inputs": [],
-                "modified": false,
-                "state": "New",
-            };
+           var preset = {
+               "name": __("Untitled Preset"),
+               "unsaved": true,
+               "id": 1,
+               "inputs": [],
+               "settings": {},
+               "modified": false,
+               "state": "New",
+           };
             while($filter('filter')($scope.presets,function(other){ return preset.id==other.id; }).length>0)
                 preset.id+=1;
             $scope.presets.push(preset);
@@ -288,7 +295,10 @@ angular.module('WPCFS')
     var update_child_config = function(){
         $scope.config = {
             "form_config": $scope.preset,
-            "building_blocks": $scope.config.building_blocks,
+            "inputs": $scope.config.inputs,
+            "datatypes": $scope.config.datatypes,
+            "comparisons": $scope.config.comparisons,
+            "general": $scope.config.general,
             "settings_pages": $scope.config.settings_pages,
         };
     };
