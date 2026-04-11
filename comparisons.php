@@ -86,12 +86,21 @@ class WPCustomFieldsSearch_Range extends WPCustomFieldsSearch_OrderedComparison
         $value = is_string($value) ? $value : '';
         $range = explode(':', $value, 2);
         if (count($range) != 2) {
-            trigger_error(
-                sprintf(
-                    __("Range format should be '<min>:<max>' received '%s'", "legacy-search-modern"),
-                    $value
-                )
-            );
+
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+
+                /* translators: %s is the invalid range value entered by the user. */
+                trigger_error(
+                    sprintf(
+                        esc_html__(
+                            "Range format should be '<min>:<max>' received '%s'",
+                            'legacy-search-modern'
+                        ),
+                        esc_html($value)
+                    ),
+                    E_USER_WARNING
+                );
+            }
 
             if (count($range) === 1) {
                 $range[] = null;

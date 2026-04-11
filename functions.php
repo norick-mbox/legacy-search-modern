@@ -1,4 +1,8 @@
 <?php
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 
 function wpcfs_strip_hash_keys($data)
 {

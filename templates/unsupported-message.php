@@ -1,3 +1,9 @@
+<?php
+if (!defined('ABSPATH')) {
+    exit;
+}
+?>
+
 <script type="text/javascript">
 try {
     wpcfs_assert_supported_browser();

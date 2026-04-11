@@ -1,4 +1,8 @@
 <?php
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 require_once dirname(__FILE__) . '/functions.php';
 if (!defined('LSM_VERSION')) {
     define('LSM_VERSION', '1.0.0');
@@ -540,11 +544,11 @@ class WPCustomFieldsSearchPlugin
             echo "OK";
         } catch (WPCustomFieldsSearchValidationException $e) {
             header("HTTP/1.1 400 Invalid Data");
-            echo "Error {$e->getMessage()}";
+            echo esc_html( 'Error: ' . $e->getMessage() );
             throw $e;
         } catch (Exception $e) {
             header("HTTP/1.1 500 Internal Error");
-            echo "Error {$e->getMessage()}";
+            echo esc_html( 'Error: ' . $e->getMessage() );
             throw $e;
         }
     }

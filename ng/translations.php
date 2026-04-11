@@ -1,4 +1,7 @@
 <?php /** Auto-generated translation file */
+if (!defined('ABSPATH')) {
+    exit;
+}
 
         $translations = array( "Cannot restrict by type {type} in {comparison}" => __("Cannot restrict by type {type} in {comparison}","legacy-search-modern"),/*ng//js/app.js */
  "Show All Post Types" => __("Show All Post Types","legacy-search-modern"),/*ng//js/app.js */

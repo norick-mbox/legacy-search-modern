@@ -1,12 +1,14 @@
 <?php
 /*
 Plugin Name: Legacy Search Modern
-Description: Import and modernize search forms from WP Custom Fields Search.
+Description: Modernized fork of WP Custom Fields Search
 Version: 1.0.0
-Author: norick saeki
+Author: norick-mbox
 Text Domain: legacy-search-modern
-Domain Path: /languages
+License: GPLv2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
  */
+
 
 if (!defined('ABSPATH')) {
     exit;

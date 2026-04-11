@@ -1,4 +1,8 @@
 <?php
+if (!defined('ABSPATH')) {
+    exit;
+}
+
     $placeholder = isset($options['label']) ? $options['label'] : '';
     $value = isset($query[$html_name]) ? $query[$html_name] : '';
 ?>

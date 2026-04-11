@@ -1,5 +1,10 @@
 <ul class='wpcfs-checkboxes'>
 <?php 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+
 // $query[$html_name] が存在しない場合に備えて安全に取り出す
 $selected = isset( $query[ $html_name ] ) ? (array) $query[ $html_name ] : array();
 

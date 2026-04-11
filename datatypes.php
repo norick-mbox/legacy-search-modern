@@ -69,8 +69,22 @@ class WPCustomFieldsSearch_PostField extends WPCustomFieldsSearch_DataType
                 trigger_error(__("Cannot auto-populate select for ", "legacy-search-modern") . $map[$field]);
                 return array();
             case 'post_author':
-                $q = $wpdb->get_results("SELECT GROUP_CONCAT(DISTINCT post_author) AS author FROM $wpdb->posts");
-                $authors = $wpdb->get_results("SELECT ID,display_name FROM $wpdb->users WHERE ID IN (" . $q[0]->author . ")");
+                $q = $wpdb->get_results(
+                    $wpdb->prepare(
+                        "SELECT post_author FROM {$wpdb->posts} WHERE ID = %d",
+                        (int) $post_id
+                    )
+                );
+
+                $author_id = !empty($q[0]->post_author) ? (int) $q[0]->post_author : 0;
+
+                $authors = $wpdb->get_results(
+                    $wpdb->prepare(
+                        "SELECT * FROM {$wpdb->users} WHERE ID = %d",
+                        $author_id
+                    )
+                );
+
                 $response = array();
                 foreach ($authors as $row) {
                     $response[] = array("value" => $row->ID, "label" => $row->display_name);

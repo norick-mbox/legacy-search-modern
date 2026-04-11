@@ -1,3 +1,9 @@
+<?php
+if (!defined('ABSPATH')) {
+    exit;
+}
+?>
+
 <?php include dirname(__FILE__) . '/unsupported-message.php';
 
 ?>

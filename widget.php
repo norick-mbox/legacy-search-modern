@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+
 require_once(dirname(__FILE__).'/functions.php');
 
 class WPCustomFieldsSearchWidget extends WP_Widget {

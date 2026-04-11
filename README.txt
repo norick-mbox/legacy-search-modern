@@ -1,8 +1,8 @@
-=== Plugin Name ===
+=== Legacy Search Modern ===
 Contributors: norick Saeki
 Tags: search, custom fields, filter, shortcode, compatibility
 Requires at least: 6.7
-Tested up to: 6.8
+Tested up to: 6.9
 Requires PHP: 8.0
 Stable tag: 1.0.0
 License: GPLv2 or later

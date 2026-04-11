@@ -1,3 +1,10 @@
+<?php 
+ if (!defined('ABSPATH')) {
+    exit;
+}
+
+?>
+
 <select
     name="<?php echo esc_attr($html_name); ?>"
     id="<?php echo esc_attr($html_id); ?>"

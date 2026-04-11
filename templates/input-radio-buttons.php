@@ -1,5 +1,9 @@
 <ul>
 <?php
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 $current = isset($query[$html_name]) ? (string) $query[$html_name] : '';
 
 if (!empty($options['options']) && is_array($options['options'])) :

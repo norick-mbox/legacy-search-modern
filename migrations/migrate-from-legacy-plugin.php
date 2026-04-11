@@ -1,4 +1,9 @@
 <?php
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+
 function wpcfs_upgrade_3_x_to_1_0(){
     $old_settings = get_option("db_customsearch_widget");
     if(!$old_settings) return;
