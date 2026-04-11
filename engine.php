@@ -8,12 +8,19 @@ class WPCustomFieldsSearch_Input
 
     public function render($options, $query)
     {
-        $template_file = apply_filters("wpcfs_form_input",
+        $template_file = apply_filters(
+            'wpcfs_form_input',
             dirname(__FILE__) . '/templates/input-' . $this->template . '.php',
-            $this->template, $options);
-        $html_name = $options['html_name'];
-        $html_id = $options['html_id'];
-        include $template_file;
+            $this->template,
+            $options
+        );
+
+        $html_name = isset($options['html_name']) ? $options['html_name'] : '';
+        $html_id = isset($options['html_id']) ? $options['html_id'] : '';
+
+        if (file_exists($template_file)) {
+            include $template_file;
+        }
     }
 
     public function get_id()
@@ -30,13 +37,25 @@ class WPCustomFieldsSearch_Input
     }
     public function is_submitted($options, $data)
     {
-        $html_name = "f" . $options['index'];
-        return array_key_exists($html_name, $data) && $data[$html_name] !== "";
+        if (!is_array($data)) {
+            return false;
+        }
+
+        $html_name = 'f' . (isset($options['index']) ? $options['index'] : '');
+
+        return array_key_exists($html_name, $data) && $data[$html_name] !== '';
     }
     public function get_submitted_value($options, $data)
     {
-        $html_name = "f" . $options['index'];
-        return $data[$html_name];
+        if (!is_array($data)) {
+            return null;
+        }
+
+        $html_name = 'f' . (isset($options['index']) ? $options['index'] : '');
+
+        return array_key_exists($html_name, $data)
+        ? $data[$html_name]
+        : null;
     }
 
     public function get_submitted_values($options, $data)
@@ -82,6 +101,10 @@ class WPCustomFieldsSearch_DataType
 
     public function get_field_aliases($config, $count)
     {
+        if (!is_array($config) || empty($config['datatype_field'])) {
+            return array();
+        }
+
         return array($this->get_field_alias($config, $config['datatype_field'], $count));
     }
 
@@ -96,7 +119,9 @@ class WPCustomFieldsSearch_DataType
             $count = 1;
         }
 
-        return "wpcfs" . $config['index'] . "_$count";
+        $index = isset($config['index']) ? (string) $config['index'] : '0';
+
+        return 'wpcfs' . $index . '_' . $count;
     }
 
     public function _array_to_suggestions_list($array)

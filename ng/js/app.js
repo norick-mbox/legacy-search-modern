@@ -11,9 +11,9 @@ angular.module('WPCFS')
             $scope.min_height = min_height + 100;
         };
         $scope.settings_visible = false;
-        $scope.datatypes = array2dict($scope.config.building_blocks.datatypes);
-        $scope.inputs = array2dict($scope.config.building_blocks.inputs);
-        $scope.comparisons = array2dict($scope.config.building_blocks.comparisons);
+        $scope.datatypes = array2dict(($scope.config.building_blocks && $scope.config.building_blocks.datatypes) || []);
+        $scope.inputs = array2dict(($scope.config.building_blocks && $scope.config.building_blocks.inputs) || []);
+        $scope.comparisons = array2dict(($scope.config.building_blocks && $scope.config.building_blocks.comparisons) || []);
         var pull_config = function () {
             if (!$scope.config.form_config.inputs) {
                 $scope.config.form_config.inputs = [];
@@ -35,7 +35,16 @@ angular.module('WPCFS')
 
         i18n.dict().then(function (__) {
             $scope.add_field = function () {
-                var new_field = {};
+
+                if (!angular.isArray($scope.form_fields)) {
+                    $scope.form_fields = [];
+                    $scope.config.form_config.inputs = $scope.form_fields;
+                }
+
+                var new_field = {
+                    options: []
+                };
+
                 $scope.form_fields.push(new_field);
                 $scope.edit_field(new_field);
             };
@@ -253,10 +262,18 @@ angular.module('WPCFS')
         $scope.include_file = $scope.config_popup.form;
         $scope.field = $scope.config_popup.field;
     }]).controller('SelectController', ['$scope', 'i18n', function ($scope, i18n) {
+        if (!$scope.field.options || !angular.isArray($scope.field.options)) {
+            $scope.field.options = [];
+        }
+
         $scope.remove_option = function (option) {
             var index = $scope.field.options.indexOf(option);
-            $scope.field.options.splice(index, 1);
+
+            if (index > -1) {
+                $scope.field.options.splice(index, 1);
+            }
         };
+
         $scope.add_option = function () {
             $scope.field.options.push({});
         };
@@ -295,7 +312,11 @@ angular.module('WPCFS')
 
         i18n.dict().then(function (__) {
             $scope.get_preset_title = function (preset) {
-                return preset.settings.form_title || preset.name || __("Untitled Preset");
+                return (
+                    (preset.settings && preset.settings.form_title) ||
+                    preset.name ||
+                    __("Untitled Preset")
+                );
             };
             $scope.add_preset = function () {
                 var preset = {
@@ -314,6 +335,13 @@ angular.module('WPCFS')
             };
 
             $scope.edit_preset = function (preset) {
+                if (!preset.inputs || !angular.isArray(preset.inputs)) {
+                    preset.inputs = [];
+                }
+
+                if (!preset.settings || typeof preset.settings !== 'object') {
+                    preset.settings = {};
+                }
                 $scope.preset = preset;
                 $scope.preset.safe = serialize_form(preset);
             };

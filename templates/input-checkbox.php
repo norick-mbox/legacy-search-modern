@@ -15,13 +15,13 @@ if ( ! empty( $options['options'] ) && is_array( $options['options'] ) ) :
         <li>
             <input
                 type="checkbox"
-                name="<?php echo htmlspecialchars( $html_name ); ?>[]"
-                value="<?php echo htmlspecialchars( $value ); ?>"
+                name="<?php echo esc_attr($html_name); ?>[]"
+                value="<?php echo esc_attr($value); ?>"
                 <?php if ( in_array( $value, $selected, true ) ) : ?> checked="checked"<?php endif; ?>
-                id="<?php echo htmlspecialchars( $id ); ?>"
+                id="<?php echo esc_attr($id); ?>"
             />
-            <label for="<?php echo htmlspecialchars( $id ); ?>">
-                <?php echo htmlspecialchars( $label ); ?>
+            <label for="<?php echo esc_attr($id); ?>">
+                <?php echo esc_html($label); ?>
             </label>
         </li>
     <?php

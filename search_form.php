@@ -3,11 +3,15 @@ class WPCFSSearchForm
 {
     public static function get_query_if_submitted($submit_id)
     {
-        if (array_key_exists('wpcfs', $_GET) && $_GET['wpcfs'] == $submit_id) {
-            return stripslashes_deep($_GET);
-        } else {
-            return array();
+        $submitted = isset($_GET['wpcfs'])
+        ? sanitize_text_field(wp_unslash($_GET['wpcfs']))
+        : '';
+
+        if ($submitted === (string) $submit_id) {
+            return stripslashes_deep(wp_unslash($_GET));
         }
+
+        return array();
     }
 
     public static function show_form($data, $submit_id, $args = null)
@@ -32,7 +36,10 @@ class WPCFSSearchForm
         $query = self::get_query_if_submitted($submit_id);
         if ($data && array_key_exists('inputs', $data) && is_array($data['inputs'])) {
             foreach ($data['inputs'] as $config) {
-                $clsname = $config['input'];
+                $clsname = isset($config['input']) ? $config['input'] : '';
+                if ($clsname === '') {
+                    continue;
+                }
                 try {
                     $config['class'] = wpcfs_instantiate_class($clsname);
                 } catch (WPCustomFieldsSearchClassException $e) {
@@ -41,7 +48,7 @@ class WPCFSSearchForm
                 }
                 $config['index'] = ++$index;
                 $config['html_name'] = "f$index";
-                $config['html_id'] = "$form_id/$config[html_name]";
+                $config['html_id'] = $form_id . '/' . $config['html_name'];
                 if ($config['class']->show_in_form) {
                     array_push($components, $config);
                 }

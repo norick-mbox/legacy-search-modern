@@ -1,10 +1,24 @@
-<select type='text' name="<?php echo htmlspecialchars($html_name)?>" id='<?php echo $html_id;?>'>
+<select
+    name="<?php echo esc_attr($html_name); ?>"
+    id="<?php echo esc_attr($html_id); ?>"
+>
+<?php
+$current = isset($query[$html_name]) ? (string) $query[$html_name] : '';
 
-<?php foreach($options['options'] as $option) {
+if (!empty($options['options']) && is_array($options['options'])) :
+    foreach ($options['options'] as $option) :
+
+        $value = isset($option['value']) ? (string) $option['value'] : '';
+        $label = isset($option['label']) ? (string) $option['label'] : '';
 ?>
-	<option value="<?php echo htmlspecialchars($option['value']); ?>"
-		 <?php if(array_key_exists($html_name, $query) && ($option['value']==$query[$html_name])) { ?> selected='selected'<?php } ?> >
-		<?php echo htmlspecialchars($option['label']);?>
-	</option>
-<?php } ?>
+    <option
+        value="<?php echo esc_attr($value); ?>"
+        <?php selected($value, $current); ?>
+    >
+        <?php echo esc_html($label); ?>
+    </option>
+<?php
+    endforeach;
+endif;
+?>
 </select>

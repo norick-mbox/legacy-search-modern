@@ -1,14 +1,21 @@
-<?php include(dirname(__FILE__).'/unsupported-message.php');
+<?php include dirname(__FILE__) . '/unsupported-message.php';
 
 ?>
-<h1><?php echo __("Configure Legacy Search Modern","legacy-search-modern")?></h1>
+<h1><?php echo __("Configure Legacy Search Modern", "legacy-search-modern") ?></h1>
 <div id='wpcfs-presets-page'>
 </div>
 
 <?php
     $legacy_options = get_option('wp_custom_fields_search');
 
-    if (!empty($legacy_options)):
+    if (empty($legacy_options) || !is_array($legacy_options)) {
+    $legacy_options = get_option('wp_custom_fields_search_options');
+    }
+
+    if (
+    is_array($legacy_options) &&
+    !empty($legacy_options['presets'])
+    ):
 ?>
     <div class="notice notice-info" style="margin:20px 0;padding:15px;">
         <p>

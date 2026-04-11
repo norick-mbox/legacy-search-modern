@@ -28,31 +28,45 @@ class WPCustomFieldsSearch_PostField extends WPCustomFieldsSearch_DataType
     }
     public function get_field_aliases($config, $count)
     {
-        if ($config['datatype_field'] === 'all') {
-            $aliases = array();
+        $field = isset($config['datatype_field'])
+        ? $config['datatype_field']
+        : 'post_title';
 
-            foreach (array('post_title', 'post_content', 'post_excerpt') as $field) {
-                $aliases[] = $this->get_field_alias($config, $field, $count);
-            }
-
-            return $aliases;
+        if ($field === 'all') {
+            return array(
+                $this->get_field_alias($config, 'post_title', $count),
+                $this->get_field_alias($config, 'post_content', $count),
+                $this->get_field_alias($config, 'post_excerpt', $count),
+            );
         }
 
-        return parent::get_field_aliases($config, $count);
+        return array(
+            $this->get_field_alias($config, $field, $count),
+        );
     }
     public function get_field_alias($config, $field_name, $count = 0)
     {
         global $wpdb;
-        return $wpdb->posts . "." . $field_name;
-    }
 
+        if ($field_name === 'ID') {
+            return $wpdb->posts . '.ID';
+        }
+
+        return $wpdb->posts . '.' . $field_name;
+    }
     public function get_suggested_values($config)
     {
+
         global $wpdb;
-        switch ($config['datatype_field']) {
+        $field = isset($config['datatype_field'])
+        ? $config['datatype_field']
+        : 'post_title';
+
+        switch ($field) {
+
             case 'post_title':case 'post_date':case 'post_content':case 'post_excerpt':case 'all':
                 $map = $this->getFieldMap();
-                trigger_error(__("Cannot auto-populate select for ", "legacy-search-modern") . $map[$config['datatype_field']]);
+                trigger_error(__("Cannot auto-populate select for ", "legacy-search-modern") . $map[$field]);
                 return array();
             case 'post_author':
                 $q = $wpdb->get_results("SELECT GROUP_CONCAT(DISTINCT post_author) AS author FROM $wpdb->posts");
@@ -126,10 +140,20 @@ class WPCustomFieldsSearch_CustomField extends WPCustomFieldsSearch_DataType
     public function add_joins($config, $join, $count)
     {
         $join = parent::add_joins($config, $join, $count);
+        $field = isset($config['datatype_field'])
+        ? $config['datatype_field']
+        : '';
+
         for ($a = 0; $a < $count; $a++) {
             $alias = $this->get_table_alias($config, $a);
-            $join = str_replace("AS $alias ON ", "AS $alias ON $alias.meta_key='" . wpcfs_escape_string($config['datatype_field']) . "' AND ", $join);
+
+            $join = str_replace(
+                "AS $alias ON ",
+                "AS $alias ON $alias.meta_key='" . wpcfs_escape_string($field) . "' AND ",
+                $join
+            );
         }
+
         return $join;
     }
     public function get_suggested_values($config)

@@ -25,15 +25,23 @@ class WPCustomFieldsSearch_OrderedComparison extends WPCustomFieldsSearch_Compar
     public function get_ordered_where($config, $value, $field_alias, $comparison)
     {
         $value = wpcfs_escape_string($value);
-        switch ($config['numeric']) {
+
+        $numeric = isset($config['numeric'])
+        ? $config['numeric']
+        : 'Alphabetical';
+
+        switch ($numeric) {
             case 'Numeric':
                 $field_alias = "1*$field_alias";
                 break;
-            case 'Alphabetical':default:
+
+            case 'Alphabetical':
+            default:
                 $value = "'$value'";
                 break;
         }
-        return "$field_alias$comparison$value";
+
+        return "$field_alias $comparison $value";
     }
     public function get_editor_options()
     {
@@ -49,7 +57,9 @@ class WPCustomFieldsSearch_GreaterThan extends WPCustomFieldsSearch_OrderedCompa
     {return __("Greater Than", "legacy-search-modern");}
     public function get_where($config, $value, $field_alias)
     {
-        $comparison = $config['inclusive'] ? ">=" : ">";
+        $inclusive = !empty($config['inclusive']);
+        $comparison = $inclusive ? '>=' : '>';
+
         return $this->get_ordered_where($config, $value, $field_alias, $comparison);
     }
 }
@@ -60,7 +70,9 @@ class WPCustomFieldsSearch_LessThan extends WPCustomFieldsSearch_OrderedComparis
 
     public function get_where($config, $value, $field_alias)
     {
-        $comparison = $config['inclusive'] ? "<=" : "<";
+        $inclusive = !empty($config['inclusive']);
+        $comparison = $inclusive ? '<=' : '<';
+
         return $this->get_ordered_where($config, $value, $field_alias, $comparison);
     }
 }
@@ -71,7 +83,8 @@ class WPCustomFieldsSearch_Range extends WPCustomFieldsSearch_OrderedComparison
 
     public function get_where($config, $value, $field_alias)
     {
-        $range = explode(":", $value);
+        $value = is_string($value) ? $value : '';
+        $range = explode(':', $value, 2);
         if (count($range) != 2) {
             trigger_error(
                 sprintf(
@@ -80,7 +93,7 @@ class WPCustomFieldsSearch_Range extends WPCustomFieldsSearch_OrderedComparison
                 )
             );
 
-            if (count($range) == 1) {
+            if (count($range) === 1) {
                 $range[] = null;
             } else {
                 $range = array_slice($range, 0, 2);
@@ -90,11 +103,11 @@ class WPCustomFieldsSearch_Range extends WPCustomFieldsSearch_OrderedComparison
         list($min, $max) = $range;
         $params = array();
         if ($min !== null && $min !== '') {
-            $comparison = $config['inclusive'] ? ">=" : ">";
+            $comparison = !empty($config['inclusive']) ? ">=" : ">";
             $params[] = $this->get_ordered_where($config, $min, $field_alias, $comparison);
         }
         if ($max !== null && $max !== '') {
-            $comparison = $config['inclusive'] ? "<=" : "<";
+            $comparison = !empty($config['inclusive']) ? "<=" : "<";
             $params[] = $this->get_ordered_where($config, $max, $field_alias, $comparison);
         }
         if (!$params) {
@@ -120,18 +133,43 @@ class WPCustomFieldsSearch_SubCategoryOf extends WPCustomFieldsSearch_Comparison
     }
     public function collect_ids($field, $category_list)
     {
-        $to_return = array();
-        foreach ($category_list as $category) {
-            $to_return[] = $category->$field;
-            $to_return = array_unique(array_merge($to_return, $this->collect_ids($field, get_categories(array("child_of" => $category->term_id)))));
+        if (
+            empty($category_list) ||
+            is_wp_error($category_list) ||
+            !is_array($category_list)
+        ) {
+            return array();
         }
+
+        $to_return = array();
+
+        foreach ($category_list as $category) {
+            if (!isset($category->$field)) {
+                continue;
+            }
+
+            $to_return[] = $category->$field;
+
+            $children = get_categories(array(
+                'child_of' => isset($category->term_id) ? $category->term_id : 0,
+            ));
+
+            $to_return = array_unique(array_merge(
+                $to_return,
+                $this->collect_ids($field, $children)
+            ));
+        }
+
         return $to_return;
     }
     public function get_where($config, $value, $field_alias)
     {
         global $wpdb;
-        $field = $config['datatype_field'];
-        if ($field == "term_id") {
+        $field = isset($config['datatype_field'])
+        ? $config['datatype_field']
+        : 'term_id';
+
+        if ($field === "term_id") {
             $dummy_category = new stdclass();
             $dummy_category->term_id = $value;
             $parent_categories = array($dummy_category);

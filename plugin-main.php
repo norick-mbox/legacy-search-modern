@@ -48,7 +48,7 @@ class WPCustomFieldsSearchPlugin
 
     public function is_search_submitted()
     {
-        return array_key_exists('wpcfs', $_REQUEST) && $_REQUEST['wpcfs'];
+        return !empty($_REQUEST['wpcfs']) && is_string($_REQUEST['wpcfs']);
     }
 
     public function get_submitted_form()
@@ -58,20 +58,40 @@ class WPCustomFieldsSearchPlugin
             $wpcfs = array_key_exists('wpcfs', $_REQUEST) ? $_REQUEST['wpcfs'] : null;
             if (!$wpcfs) {
                 $submitted = null;
-            } elseif (substr($wpcfs, 0, 23) == "wp_custom_fields_search") {
+            } elseif (substr($wpcfs, 0, 23) === "wp_custom_fields_search") {
                 $options = get_option('legacy_search_modern_widgets', array());
 
-                $submitted = json_decode($options[substr($wpcfs, 24)]['data'], true);
-            } elseif (substr($wpcfs, 0, 7) == "preset-") {
+                $widget_id = substr($wpcfs, 24);
+
+                if (
+                    isset($options[$widget_id]) &&
+                    isset($options[$widget_id]['data'])
+                ) {
+                    $submitted = json_decode($options[$widget_id]['data'], true);
+                } else {
+                    $submitted = false;
+                }
+
+            } elseif (substr($wpcfs, 0, 7) === "preset-") {
                 $config = get_option(LSM_OPTION_NAME, array(
                     'presets' => array(),
                 ));
 
-                $submitted = $config['presets'][substr($wpcfs, 7)];
+                $preset_id = substr($wpcfs, 7);
+
+                $submitted = isset($config['presets'][$preset_id])
+                ? $config['presets'][$preset_id]
+                : false;
+
             } else {
                 $submitted = false;
             }
-            if ($submitted) {
+            if (
+                $submitted &&
+                isset($submitted['inputs']) &&
+                is_array($submitted['inputs'])
+            ) {
+
                 require_once dirname(__FILE__) . '/engine.php';
                 $index = 0;
                 foreach ($submitted['inputs'] as $k => &$input) {
@@ -171,7 +191,12 @@ class WPCustomFieldsSearchPlugin
         global $wpdb;
 
         $form = $this->get_submitted_form();
-        if (!$form || !array_key_exists('default_post_types', $form['settings'])) {
+        if (
+            !$form ||
+            !isset($form['settings']) ||
+            !is_array($form['settings']) ||
+            !array_key_exists('default_post_types', $form['settings'])
+        ) {
             return $where;
         }
 
@@ -190,14 +215,18 @@ class WPCustomFieldsSearchPlugin
             $where
         );
 
-        $selected_post_types = $form['settings']['selected_post_types'];
+        $selected_post_types = isset($form['settings']['selected_post_types'])
+        && is_array($form['settings']['selected_post_types'])
+        ? $form['settings']['selected_post_types']
+        : array();
+
         if (in_array("###ANY###", $selected_post_types) || !$selected_post_types) {
             return $where;
         }
 
         $options = [];
         foreach ($selected_post_types as $type) {
-            $options[] = "'" . esc_html($type) . "'";
+            $options[] = "'" . esc_sql($type) . "'";
         }
         $where .= " AND $wpdb->posts.post_type IN (" . join(",", $options) . ") ";
 
@@ -211,6 +240,10 @@ class WPCustomFieldsSearchPlugin
             return array();
         }
         $inputs = array();
+        if (!isset($form['inputs']) || !is_array($form['inputs'])) {
+            return array();
+        }
+
         foreach ($form['inputs'] as $input) {
             if ($input['input']->is_submitted($input, $_REQUEST)) {
                 $inputs[] = $input;
@@ -236,7 +269,9 @@ class WPCustomFieldsSearchPlugin
         foreach ($input['input']->get_submitted_values($input, $_REQUEST) as $value) {
             $found[] = $input['comparison']->describe($label, $value);
         }
-        $join = (@$input['multi_match'] == "Any")
+        $join = (
+            isset($input['multi_match']) && $input['multi_match'] === 'Any'
+        )
         ? __(" or ", "legacy-search-modern")
         : __(" &amp; ", "legacy-search-modern");
 
@@ -262,14 +297,24 @@ class WPCustomFieldsSearchPlugin
     }
     public function angular_dependencies()
     {
+        check_ajax_referer('wpcfs_admin_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_die('Forbidden', '', array('response' => 403));
+        }
+
         header('Content-Type: application/javascript; charset=utf-8');
 
         $libs = $this->get_angular_libraries();
         $module_names = array();
 
         foreach ($libs as $lib) {
-            if (is_array($lib) && isset($lib['module_name']) && $lib['module_name'] !== '') {
-                $module_names[] = $lib['module_name'];
+            if (
+                is_array($lib)
+                && isset($lib['module_name'])
+                && $lib['module_name'] !== ''
+            ) {
+                $module_names[] = sanitize_key($lib['module_name']);
             }
         }
 
@@ -280,11 +325,7 @@ class WPCustomFieldsSearchPlugin
     {
         $angular_libraries = $this->get_angular_libraries();
         $angular_dependencies = array("angularjs");
-        wp_enqueue_script(
-            "angularjs",
-            plugin_dir_url(__FILE__) . "js/angular.min.js",
-            array('jquery')
-        );
+
         foreach ($angular_libraries as $library) {
             if (!array_key_exists("dependencies", $library)) {
                 $library["dependencies"] = array();
@@ -363,13 +404,16 @@ class WPCustomFieldsSearchPlugin
             'wpcfsAdmin',
             array(
                 'root' => plugin_dir_url(__FILE__),
-                'presets' => $config['presets'],
+                'presets' => isset($config['presets']) && is_array($config['presets'])
+                ? $config['presets']
+                : array(),
                 'editor_config' => self::get_javascript_editor_config(),
                 'settings_pages' => apply_filters('wpcfs_settings_pages', array()),
                 'save_nonce' => wp_create_nonce('wpcfs_save_preset'),
                 'delete_nonce' => wp_create_nonce('wpcfs_delete_preset'),
                 'export_nonce' => wp_create_nonce('wpcfs_export_settings'),
                 'importNonce' => wp_create_nonce('legacy_search_modern_import'),
+                'adminNonce' => wp_create_nonce('wpcfs_admin_nonce'),
             )
         );
 
@@ -429,7 +473,7 @@ class WPCustomFieldsSearchPlugin
 
     public function presets_page()
     {
-        if ($_POST) {
+        if (!empty($_POST)) {
             // Save something...
             // Return
         }
@@ -449,17 +493,33 @@ class WPCustomFieldsSearchPlugin
         }
 
         try {
-            $data = json_decode(wpcfs_strip_hash_keys(stripslashes($_POST['data'])), true);
-            $id = $data['id'];
-            if ($data === null) {
-                throw new WPCustomFieldsSearchValidationException("data is required");
+            $raw_data = isset($_POST['data'])
+            ? wp_unslash($_POST['data'])
+            : '';
+
+            if ($raw_data === '') {
+                throw new WPCustomFieldsSearchValidationException('data is required');
             }
+
+            $data = json_decode(
+                wpcfs_strip_hash_keys($raw_data),
+                true
+            );
+
+            if (!is_array($data) || empty($data['id'])) {
+                throw new WPCustomFieldsSearchValidationException('invalid preset');
+            }
+
+            $id = sanitize_key((string) $data['id']);
 
             $config = get_option(LSM_OPTION_NAME, array(
                 'presets' => array(),
             ));
 
-            if (!$config['presets']) {
+            if (
+                !isset($config['presets']) ||
+                !is_array($config['presets'])
+            ) {
                 $config['presets'] = array();
             }
 
@@ -486,12 +546,26 @@ class WPCustomFieldsSearchPlugin
             throw new Exception("403 Forbidden");
         }
 
-        $id = $_POST['id'];
+        $id = isset($_POST['id'])
+        ? sanitize_key(wp_unslash($_POST['id']))
+        : '';
+
+        if ($id === '') {
+            wp_send_json_error('invalid_id', 400);
+        }
+
         $config = get_option(LSM_OPTION_NAME, array(
             'presets' => array(),
         ));
 
-        unset($config['presets'][$id]);
+        if (
+            isset($config['presets']) &&
+            is_array($config['presets']) &&
+            array_key_exists($id, $config['presets'])
+        ) {
+            unset($config['presets'][$id]);
+        }
+
         update_option(LSM_OPTION_NAME, $config);
         echo "OK";
     }
@@ -627,15 +701,19 @@ class WPCustomFieldsSearchPlugin
 
     public function show_preset($id)
     {
-        require_once "search_form.php";
+        require_once dirname(__FILE__) . "/search_form.php";
         $preset = $this->get_preset_config($id);
+        if (empty($preset)) {
+            return;
+        }
+
         include dirname(__FILE__) . '/templates/preset-display.php';
     }
 
     public function get_preset_config($id)
     {
-        require_once "engine.php";
-        if ($id == "default") {
+        require_once dirname(__FILE__) . "/engine.php";
+        if ($id === "default") {
             $id = 0;
         }
 
@@ -653,18 +731,30 @@ class WPCustomFieldsSearchPlugin
 
     public function ng_load_translations()
     {
+        check_ajax_referer('wpcfs_admin_nonce', 'nonce');
 
-        // 管理者のみ許可（必要に応じて権限は調整可）
         if (!current_user_can('manage_options')) {
-            wp_send_json_error(array('message' => 'Forbidden'), 403);
+            wp_send_json_error(array(
+                'message' => 'Forbidden',
+            ), 403);
         }
 
-        $files = apply_filters('wpcfs_ng_translation_files', array(dirname(__FILE__) . '/ng/translations.php'));
+        $files = apply_filters(
+            'wpcfs_ng_translation_files',
+            array(dirname(__FILE__) . '/ng/translations.php')
+        );
+
         $all_translations = array();
 
         foreach ($files as $file) {
+            if (!is_string($file) || !file_exists($file)) {
+                continue;
+            }
+
             $translations = array();
+
             require $file;
+
             if (!empty($translations) && is_array($translations)) {
                 $all_translations = array_merge($all_translations, $translations);
             }
@@ -694,15 +784,22 @@ class WPCustomFieldsSearchPlugin
     }
     public function ng_load_taxonomy()
     {
+        check_ajax_referer('wpcfs_admin_nonce', 'nonce');
 
         if (!current_user_can('manage_options')) {
-            wp_send_json_error(array('message' => 'Forbidden'), 403);
+            wp_send_json_error(array(
+                'message' => 'Forbidden',
+            ), 403);
         }
 
-        $taxonomy_name = isset($_GET['taxonomy']) ? sanitize_key(wp_unslash($_GET['taxonomy'])) : '';
+        $taxonomy_name = isset($_GET['taxonomy'])
+        ? sanitize_key(wp_unslash($_GET['taxonomy']))
+        : '';
 
-        if (empty($taxonomy_name) || !taxonomy_exists($taxonomy_name)) {
-            wp_send_json_error(array('message' => 'Invalid taxonomy'), 400);
+        if ($taxonomy_name === '' || !taxonomy_exists($taxonomy_name)) {
+            wp_send_json_error(array(
+                'message' => 'Invalid taxonomy',
+            ), 400);
         }
 
         $terms = $this->recurseTaxonomy($taxonomy_name, 0);
@@ -712,18 +809,23 @@ class WPCustomFieldsSearchPlugin
 
     public function export_settings()
     {
+        check_ajax_referer('wpcfs_admin_nonce', 'nonce');
 
         if (!current_user_can('manage_options')) {
-            wp_send_json_error(array('message' => 'Forbidden'), 403);
+            wp_send_json_error(array(
+                'message' => 'Forbidden',
+            ), 403);
         }
 
         $export = array(
             'doc_type' => 'legacy-search-modern export',
-            'plugin_version' => WPCFS_PLUGIN_VERSION,
+            'plugin_version' => defined('WPCFS_PLUGIN_VERSION')
+            ? WPCFS_PLUGIN_VERSION
+            : '0.1.0',
             'format_version' => '1',
             'presets' => get_option(LSM_OPTION_NAME, array()),
             'widget' => get_option('legacy_search_modern_widgets', array()),
-            'sidebars' => get_option('sidebars_widgets'),
+            'sidebars' => get_option('sidebars_widgets', array()),
         );
 
         wp_send_json($export);
@@ -738,11 +840,9 @@ class WPCustomFieldsSearchPlugin
         return $instance;
     }
 }
-require_once plugin_dir_path(__FILE__) . 'includes/class-legacy-importer.php';
+require_once plugin_dir_path(__FILE__) . '/includes/class-legacy-importer.php';
 
 register_activation_hook(__FILE__, function () {
-
-    include_once ABSPATH . 'wp-admin/includes/plugin.php';
 
     include_once ABSPATH . 'wp-admin/includes/plugin.php';
 

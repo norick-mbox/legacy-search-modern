@@ -52,6 +52,9 @@ jQuery(function ($) {
 	if (!$editor.length) {
 		return;
 	}
+	if (typeof window.wpcfsAdmin === 'undefined') {
+		return;
+	}
 
 	$editor.wpcfs_editor({
 		mode: 'presets',
@@ -74,6 +77,12 @@ jQuery(function ($) {
 });
 
 jQuery(document).on('click', '#legacy-search-modern-import', function () {
+	if (typeof ajaxurl === 'undefined' ||
+		typeof wpcfsAdmin === 'undefined' ||
+		!wpcfsAdmin.importNonce) {
+		alert('Import configuration is missing.');
+		return;
+	}
 
 	if (!confirm('Import settings from WP Custom Fields Search? This will overwrite the current settings.')) {
 		return;
@@ -92,7 +101,7 @@ jQuery(document).on('click', '#legacy-search-modern-import', function () {
 			alert('Settings imported successfully.');
 			window.location.reload();
 		} else {
-			alert('Import failed.');
+			alert(response && response.data ? response.data : 'Import failed.');
 			$button.prop('disabled', false).text('Import Settings');
 		}
 
