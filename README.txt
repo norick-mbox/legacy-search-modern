@@ -1,17 +1,19 @@
 === Plugin Name ===
-Contributors: don@don-benjamin.co.uk
-Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=accounts@webhammer.co.uk&item_name=Custom Search Donation&currency_code=GBP
-Tags: search,custom fields,widget,sidebar
-Requires at least: 3.1.1
-Tested up to: 5.4-beta3
-Stable tag: 1.2.35
-License: Apache 2.0
+Contributors: norick Saeki
+Tags: search, custom fields, filter, shortcode, compatibility
+Requires at least: 6.7
+Tested up to: 6.8
+Requires PHP: 8.0
+Stable tag: 1.0.0
+License: GPLv2 or later
 License URI: http://www.apache.org/licenses/LICENSE-2.0
  
 Build search forms to provide custom search functionality allowing search of built in post fields, custom fields via a variety of different inputs and comparison types.
  
 == Description ==
- 
+Legacy Search Modern is a modernized fork of WP Custom Fields Search.
+
+It can import existing WP Custom Fields Search settings and continues to support existing presets, shortcodes and GET parameters while improving compatibility with modern WordPress and PHP versions.
 This plugin provides an admin interface allowing you to build powerful search forms for your wordpress site.  
 
 With this you can give your readers the ability to search and filter your posts / catalogue to quickly find the information they need.  Any custom fields you have added to your posts can be made searchable as well as the core post fields like title, author, categories etc.  Configurable input widgets allow you to customise the form further to build exactly the search you need for your site.
@@ -211,10 +213,11 @@ If the posts do display elsewhere on your public facing site but not in the wpcf
 
 == Installation ==
  
-1. Unzip `wp-custom-fields-search.zip` to the `/wp-content/plugins/` directory
-1. Activate the plugin through the 'Plugins' menu in WordPress
-1. Either add a sidebar widget or include one of the presets via short_code or php code
-
+1. Deactivate WP Custom Fields Search if it is currently active
+2. Upload Legacy Search Modern to the /wp-content/plugins/ directory
+3. Activate Legacy Search Modern
+4. Open the Legacy Search Modern admin page
+5. Click "Import Settings" if existing WP Custom Fields Search settings are found
 == Screenshots ==
 
 1.  Adding a custom search form in the widgets area
@@ -225,197 +228,10 @@ If the posts do display elsewhere on your public facing site but not in the wpcf
 
 == Changelog ==
 
-= 1.2.35 =
-* Fixes escaping issue reported by Darius Sveikauskas patchstack.com
-
-https://patchstack.com/database/report-preview/d070e244-9f1c-4c4b-aa22-69baa3506272
-
-= 1.2.34 =
-* Fixed some incompatibilities with PHP8 and block themes
-
-= 1.2.33 =
-* Suppress warnings in the dropdown template
-
-= 1.2.32 =
-* Fixed incompatibility with newer jQuerys
-
-= 1.2.31 =
-* Updated PayPal account
-
-= 1.2.30 =
-* Regenerated translation files
-
-= 1.2.29 =
-* Some small refactoring for easier extension
-* Fixed an issue with wp_query being rewritten for irrelevant queries
-
-= 1.2.28 =
-* Custom taxonomy dropdowns were being populated with values from other taxonomies https://wordpress.org/support/topic/custom-taxonomy-dropdown-show-all-category/
-
-= 1.2.26 =
-* Fixed some issues with checkbox / any matches.
-
-= 1.2.26 =
-* False alarm - reverted to 1.2.24
-
-= 1.2.25 =
-* Restored the old behaviour as there was a bug.
-
-= 1.2.24 =
-* Changed the search behaviour to only operate on the main query by default.  Previous behaviour was causing issues when the WP_Query object was used outside of the main loop.
-* Added a filter to restore the old behaviour, to restore the old behaviour use: `add_filter('wpcfs_should_override_current_query', function() { return true; })` in your `functions.php` file
-* Fixed a bug with pagination
-
-= 1.2.23 =
-* Fixed bug with post_type selector
-
-= 1.2.22 =
-* Added custom taxonomy datatype
-
-= 1.2.21 =
-* Added missing config page
-
-= 1.2.20 =
-* Added new action 'wpcfs_engine_loaded' for loading subclasses of the core search fields
-* Added option to show only a subtree from a taxonomy
-
-= 1.2.19 =
-* Search results were not showing if the show_on_front option was set to a page.  Hopefully fixes https://wordpress.org/support/topic/is-the-plugin-compatible-with-avada-theme/
-
-= 1.2.18 =
-* Search results were not showing if the site_url pointed to a page.  Hopefully fixes https://wordpress.org/support/topic/is-the-plugin-compatible-with-avada-theme/
-
-= 1.2.17 =
-* Added post types config (https://wordpress.org/support/topic/is-the-plugin-compatible-with-avada-theme/)
-* Fixed the problem with post fields always resetting when re-opening the edit form
-* Fixed some javascript error messages
-
-= 1.2.16 =
-* Tested with latest wordpress beta
-* Removed some warning messages
-
-= 1.2.15 =
-* https://wordpress.org/support/topic/fonction-in-range-not-working/
-
-= 1.2.14 =
-* Re-tested with Wordpress 5.3.2
-* https://wordpress.org/support/topic/warning-count-parameter-must-be-an-array-4/ 
-
-= 1.2.13 =
-* Re-tested with Wordpress 5.2.3
-
-= 1.2.12 =
-* https://wordpress.org/support/topic/opening-tag-instead-of-closing-tag-in-code/
-
-= 1.2.11 =
-* Expanded the description as the plugin repository is cutting off the first line.
-
-= 1.2.10 =
-* Short codes were incorrectly implemented - https://wordpress.org/support/topic/invalid-header-26/
-
-= 1.2.9 =
-* Switched default form target to pull from the 'site_url' option as '/' was failing on some MU configurations - https://wordpress.org/support/topic/wrong-blog-url-on-multisite/
-
-= 1.2.8 =
-* Removed a warning message relating to static methods; https://wordpress.org/support/topic/line-440/
-* Improved extension hooks for the angular admin app
-
-= 1.2.7 =
-* Fixed some issues with the JS extension code
-
-= 1.2.6 =
-* Fixed warning message when form unsubmitted.
-
-= 1.2.5 =
-* Added FAQ tab
-
-= 1.2.4 =
-* Fixes warning message for dropdowns with post_type field
-
-= 1.2.3 =
-* Fixes regressions from 1.2.2
-
-= 1.2.2 =
-* Added text domain to translation strings, hopefully fixes https://wordpress.org/support/topic/problems-with-localization-2/
-
-= 1.2.1 =
-* Correcting some issues with the README file
-
-= 1.2.0 =
-* Complete re-design of the admin interface
-* Initial work towards a JS unit test suite
-
-= 1.1.14 =
-* Removed double slash from URLs, hopefully this will fix https://wordpress.org/support/topic/preset-page-blank/#post-9939623 and related issues.
-
-= 1.1.13 =
-* Added a warning that older version of IE (pre 11) are not supported
-
-= 1.1.12 =
-* Fixed another warning when no search inputs are configured
-
-= 1.1.11 =
-* Fixed a few warnings being shown
-* Fixed an issue with field naming, not sure if this was affecting functionality
-
-= 1.1.10 =
-* Corrected the fix from 1.1.8 - was still crashing when form was submitted
-
-= 1.1.9 =
-* Fixed empty search results when MySQLi is installed but not being used.
-
-= 1.1.8 =
-* Fixed crash when invalid (or no) class specified in the config
-
-= 1.1.7 =
-* Fixed crash on systems without legacy MySQL extension
-* Deals with Wordpress' magic quotes
-
-= 1.1.6 =
-* Fixed bug causing crashes in older PHP versions
-
-= 1.1.5 =
-* Fixed bug causing corruption of form configs on save
-
-= 1.1.4 =
-* Fixed bug whereby shortcodes were not working
-
-= 1.1.3 =
-* Fixed a translation issue crashing the widget editor
-
-= 1.1.2 =
-* Fixed an issue with the migration
-* Added export option for debugging
- 
-= 1.1.1 =
-* Fixed regression for old php versions
-
-= 1.1.0 =
-* Added multi-lingual support
-* Added banners / icons for the wordpress repository
-* No need to upgrade unless you plan to translate the plugin
-
-= 1.0 =
-* This is a major rebuild from 0.3.28, the rebuild should allow for easier extension and configuration
-* If you are using bespoke or customised versions based on the 0.3 plugin those customisations will almost certainly not be compatible with this upgrade.
- 
-= 0.3.28 =
-* Stable legacy version
- 
-== Upgrade Notice ==
- 
-= 1.1.5 =
-* This fixes a serious bug introduced in 1.1.3, if you are using either 1.1.3 or 1.1.4 please upgrade.  Not upgrading may result in your form config being lost.
-
-= 1.0 =
-* This is a major rebuild from 0.3.28, this should make form configuration significantly easier.
-* This will enable new extended functionalities.
-* This has been tested against the latest versions of wordpress
-* The shortcode format has changed, format is now [wpcfs-preset preset=x] where x is the id of the preset you wish to show
-* If you are using bespoke or customised versions based on the 0.3 plugin those customisations will almost certainly not be compatible with this upgrade and you should proceed with caution or keep your installed version
- 
-= 0.3.28 =
-This version simply adds a notice warning that the upgrade to 1.0.0 may break compatibility with historic extensions and inviting users to the beta release.
- 
-= 0.3.27 = 
-Stable-ish for up to 2 years.
+= 1.0.0 =
+* First release of Legacy Search Modern
+* Added import from WP Custom Fields Search
+* Added compatibility with existing presets, shortcodes and GET parameters
+* Improved compatibility with WordPress 6.7+ and PHP 8.3+
+* Added security, nonce and escaping improvements
+* Added safer handling of broken or missing settings

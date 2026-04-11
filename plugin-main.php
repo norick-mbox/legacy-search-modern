@@ -1,5 +1,14 @@
 <?php
 require_once dirname(__FILE__) . '/functions.php';
+if (!defined('LSM_VERSION')) {
+    define('LSM_VERSION', '1.0.0');
+}
+
+if (!defined('LSM_OPTION_NAME')) {
+    define('LSM_OPTION_NAME', 'legacy_search_modern_options');
+}
+
+
 
 class WPCustomFieldsSearchValidationException extends Exception
 {}
@@ -343,7 +352,7 @@ class WPCustomFieldsSearchPlugin
             'angularjs',
             plugin_dir_url(__FILE__) . 'js/angular.min.js',
             array('jquery'),
-            '1.5.11',
+            LSM_VERSION,
             true
         );
 
@@ -444,7 +453,8 @@ class WPCustomFieldsSearchPlugin
     public function admin_init()
     {
         $previous_version = get_option("legacy_search_modern_version");
-        $current_version = '0.1.0';
+        $current_version = LSM_VERSION;
+
         if ($previous_version != $current_version) {
             $this->upgrade_plugin($previous_version, $current_version);
             update_option("legacy_search_modern_version", $current_version);
@@ -821,7 +831,7 @@ class WPCustomFieldsSearchPlugin
             'doc_type' => 'legacy-search-modern export',
             'plugin_version' => defined('WPCFS_PLUGIN_VERSION')
             ? WPCFS_PLUGIN_VERSION
-            : '0.1.0',
+            : LSM_VERSION,
             'format_version' => '1',
             'presets' => get_option(LSM_OPTION_NAME, array()),
             'widget' => get_option('legacy_search_modern_widgets', array()),

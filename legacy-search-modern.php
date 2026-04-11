@@ -2,7 +2,7 @@
 /*
 Plugin Name: Legacy Search Modern
 Description: Import and modernize search forms from WP Custom Fields Search.
-Version: 0.1.0
+Version: 1.0.0
 Author: norick saeki
 Text Domain: legacy-search-modern
 Domain Path: /languages
