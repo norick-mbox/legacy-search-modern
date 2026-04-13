@@ -7,10 +7,11 @@ Requires PHP: 8.0
 Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: http://www.apache.org/licenses/LICENSE-2.0
- 
+Import-compatible modern fork of WP Custom Fields Search for WordPress 6.7 and PHP 8.2+.
+
+== Description ==
 Build search forms to provide custom search functionality allowing search of built in post fields, custom fields via a variety of different inputs and comparison types.
  
-== Description ==
 Legacy Search Modern is a modernized fork of WP Custom Fields Search.
 
 It can import existing WP Custom Fields Search settings and continues to support existing presets, shortcodes and GET parameters while improving compatibility with modern WordPress and PHP versions.

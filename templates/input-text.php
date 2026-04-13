@@ -3,8 +3,11 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-    $placeholder = isset($options['label']) ? $options['label'] : '';
-    $value = isset($query[$html_name]) ? $query[$html_name] : '';
+    // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+$placeholder = isset($options['label']) ? $options['label'] : '';
+$value = isset($query[$html_name]) ? $query[$html_name] : '';
+// phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+
 ?>
 
 <input

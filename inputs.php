@@ -15,8 +15,15 @@ class WPCustomFieldsSearch_TextBoxInput extends WPCustomFieldsSearch_Input
     }
     public function get_submitted_value($options, $data)
     {
-        $html_name = "f" . $options['index'];
-        $value = isset($data[$html_name]) ? $data[$html_name] : '';
+        $index = isset($options['index']) ? $options['index'] : '';
+        $html_name = 'f' . $index;
+
+        $value = (
+            is_array($data) &&
+            array_key_exists($html_name, $data)
+        )
+        ? $data[$html_name]
+        : '';
 
         if (array_key_exists('split_words', $options) && $options['split_words']) {
             return array_values(array_filter(explode(' ', $value), 'strlen'));
@@ -66,8 +73,25 @@ class WPCustomFieldsSearch_SelectInput extends WPCustomFieldsSearch_Input
     {
         if (isset($config['source']) && $config['source'] === 'Auto') {
             try {
-                $datatype = wpcfs_instantiate_class($config['datatype']);
-                $config['options'] = array_merge(array(array("value" => "", "label" => $config['any_message'])), $datatype->get_suggested_values($config));
+                $datatype_name = isset($config['datatype']) ? $config['datatype'] : '';
+                $datatype = wpcfs_instantiate_class($datatype_name);
+
+                $suggested = $datatype->get_suggested_values($config);
+
+                if (!is_array($suggested)) {
+                    $suggested = array();
+                }
+
+                $config['options'] = array_merge(
+                    array(
+                        array(
+                            'value' => '',
+                            'label' => isset($config['any_message']) ? $config['any_message'] : __('Any', 'legacy-search-modern'),
+                        ),
+                    ),
+                    $suggested
+                );
+
             } catch (WPCustomFieldsSearchClassException $e) {
                 $config['options'] = array();
             }
@@ -102,8 +126,14 @@ class WPCustomFieldsSearch_CheckboxInput extends WPCustomFieldsSearch_Input
     {
         if (isset($config['source']) && $config['source'] === 'Auto') {
             try {
-                $datatype = wpcfs_instantiate_class($config['datatype']);
+                $datatype_name = isset($config['datatype']) ? $config['datatype'] : '';
+                $datatype = wpcfs_instantiate_class($datatype_name);
+
                 $config['options'] = $datatype->get_suggested_values($config);
+
+                if (!is_array($config['options'])) {
+                    $config['options'] = array();
+                }
             } catch (WPCustomFieldsSearchClassException $e) {
                 $config['options'] = array();
             }
@@ -124,7 +154,10 @@ class WPCustomFieldsSearch_HiddenInput extends WPCustomFieldsSearch_Input
     }
     public function get_submitted_value($options, $data)
     {
-        return $options['constant_value'];
+        return isset($options['constant_value'])
+        ? $options['constant_value']
+        : '';
+
     }
 
     public function get_name()

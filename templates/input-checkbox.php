@@ -5,6 +5,7 @@ if (!defined('ABSPATH')) {
 }
 
 
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 // $query[$html_name] が存在しない場合に備えて安全に取り出す
 $selected = isset( $query[ $html_name ] ) ? (array) $query[ $html_name ] : array();
 
@@ -33,4 +34,6 @@ if ( ! empty( $options['options'] ) && is_array( $options['options'] ) ) :
     endforeach;
 endif;
 ?>
+<?php // phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound ?>
+
 </ul>

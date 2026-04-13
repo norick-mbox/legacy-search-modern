@@ -2,6 +2,7 @@
  if (!defined('ABSPATH')) {
     exit;
 }
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 
 ?>
 
@@ -28,4 +29,5 @@ if (!empty($options['options']) && is_array($options['options'])) :
     endforeach;
 endif;
 ?>
+<?php // phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound ?>
 </select>

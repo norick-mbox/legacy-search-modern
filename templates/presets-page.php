@@ -12,11 +12,13 @@ if (!defined('ABSPATH')) {
 </div>
 
 <?php
-    $legacy_options = get_option('wp_custom_fields_search');
+    // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+$legacy_options = get_option('wp_custom_fields_search');
 
-    if (empty($legacy_options) || !is_array($legacy_options)) {
+if (empty($legacy_options) || !is_array($legacy_options)) {
     $legacy_options = get_option('wp_custom_fields_search_options');
-    }
+}
+// phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 
     if (
     is_array($legacy_options) &&

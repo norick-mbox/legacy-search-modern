@@ -68,6 +68,7 @@ class WPCustomFieldsSearch_PostField extends WPCustomFieldsSearch_DataType
 
                 return array();
             case 'post_author':
+                // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
                 $q = $wpdb->get_results(
                     $wpdb->prepare(
                         "SELECT post_author FROM {$wpdb->posts} WHERE ID = %d",
@@ -78,7 +79,7 @@ class WPCustomFieldsSearch_PostField extends WPCustomFieldsSearch_DataType
                 $author_id = !empty($q[0]->post_author)
                 ? (int) $q[0]->post_author
                 : 0;
-
+                // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
                 $authors = $wpdb->get_results(
                     $wpdb->prepare(
                         "SELECT * FROM {$wpdb->users} WHERE ID = %d",
@@ -93,6 +94,7 @@ class WPCustomFieldsSearch_PostField extends WPCustomFieldsSearch_DataType
                 return $response;
             case 'post_type':
                 return $this->_array_to_suggestions_list(
+                    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
                     $wpdb->get_col(
                         "SELECT DISTINCT post_type FROM {$wpdb->posts} WHERE post_status = 'publish'"
                     )
@@ -136,11 +138,25 @@ class WPCustomFieldsSearch_CustomField extends WPCustomFieldsSearch_DataType
     public function getFieldMap()
     {
         global $wpdb;
-        $results = $wpdb->get_results("SELECT DISTINCT(meta_key) FROM $wpdb->postmeta ORDER BY meta_key");
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+        $results = $wpdb->get_results(
+            "SELECT DISTINCT(meta_key) FROM $wpdb->postmeta ORDER BY meta_key"
+        );
+
         $fields = array();
+
+        if (!is_array($results)) {
+            return $fields;
+        }
+
         foreach ($results as $result) {
+            if (!isset($result->meta_key)) {
+                continue;
+            }
+
             $fields[$result->meta_key] = $result->meta_key;
         }
+
         return $fields;
     }
     public function getAvailableFields()
@@ -179,7 +195,25 @@ class WPCustomFieldsSearch_CustomField extends WPCustomFieldsSearch_DataType
     public function get_suggested_values($config)
     {
         global $wpdb;
-        $values = $wpdb->get_col($wpdb->prepare("SELECT DISTINCT meta_value FROM $wpdb->postmeta WHERE meta_key=%s ORDER BY meta_value", $config['datatype_field']));
+        $field = isset($config['datatype_field'])
+        ? $config['datatype_field']
+        : '';
+
+        if ($field === '') {
+            return array();
+        }
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+        $values = $wpdb->get_col(
+            $wpdb->prepare(
+                "SELECT DISTINCT meta_value FROM $wpdb->postmeta WHERE meta_key=%s ORDER BY meta_value",
+                $field
+            )
+        );
+
+        if (!is_array($values)) {
+            $values = array();
+        }
+
         return $this->_array_to_suggestions_list($values);
     }
 }
@@ -226,9 +260,22 @@ class WPCustomFieldsSearch_TaxonomyTerm extends WPCustomFieldsSearch_DataType
 
     public function recurse_category($id, $field, $taxonomy, $trace = array())
     {
-        $categories = get_terms(array('parent' => $id, "taxonomy" => $taxonomy, 'hide_empty' => false));
+        $categories = get_terms(array(
+            'parent' => $id,
+            'taxonomy' => $taxonomy,
+            'hide_empty' => false,
+        ));
+
         $values = array();
+
+        if (is_wp_error($categories) || !is_array($categories)) {
+            return $values;
+        }
+
         foreach ($categories as $category) {
+            if (!isset($category->$field)) {
+                continue;
+            }
             $full_trace = array_merge($trace, array($category));
             $values[] = array("value" => $category->$field, "label" => $category->name);
             $values = array_merge(
@@ -242,8 +289,24 @@ class WPCustomFieldsSearch_TaxonomyTerm extends WPCustomFieldsSearch_DataType
 
     public function get_suggested_values($config)
     {
-        $root = array_key_exists('taxonomy_root', $config) ? $config['taxonomy_root'] : 0;
-        return $this->recurse_category($root, $config['datatype_field'], $this->taxonomy);
+        $root = isset($config['taxonomy_root'])
+        ? $config['taxonomy_root']
+        : 0;
+
+        $field = isset($config['datatype_field'])
+        ? $config['datatype_field']
+        : 'name';
+
+        $taxonomy = isset($this->taxonomy)
+        ? $this->taxonomy
+        : '';
+
+        if ($taxonomy === '') {
+            return array();
+        }
+
+        return $this->recurse_category($root, $field, $taxonomy);
+
     }
 }
 
@@ -256,8 +319,14 @@ class WPCustomFieldsSearch_CustomTaxonomy extends WPCustomFieldsSearch_TaxonomyT
 
     public function getFieldMap()
     {
+        $taxonomies = get_taxonomies(array(), 'names');
+
+        if (!is_array($taxonomies)) {
+            return array();
+        }
+
         return array_reduce(
-            get_taxonomies(array(), 'names'),
+            $taxonomies,
             function ($map, $taxonomyName) {
                 $taxonomy = get_taxonomy($taxonomyName);
                 $map[$taxonomyName] = isset($taxonomy->labels->name)
@@ -287,8 +356,20 @@ class WPCustomFieldsSearch_CustomTaxonomy extends WPCustomFieldsSearch_TaxonomyT
 
     public function get_suggested_values($config)
     {
-        $root = array_key_exists('taxonomy_root', $config) ? $config['taxonomy_root'] : 0;
-        return $this->recurse_category($root, 'term_id', $config['datatype_field']);
+        $root = isset($config['taxonomy_root'])
+        ? $config['taxonomy_root']
+        : 0;
+
+        $taxonomy = isset($config['datatype_field'])
+        ? $config['datatype_field']
+        : '';
+
+        if ($taxonomy === '') {
+            return array();
+        }
+
+        return $this->recurse_category($root, 'term_id', $taxonomy);
+
     }
 }
 class WPCustomFieldsSearch_Category extends WPCustomFieldsSearch_TaxonomyTerm

@@ -3,12 +3,16 @@ class WPCFSSearchForm
 {
     public static function get_query_if_submitted($submit_id)
     {
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended
         $submitted = isset($_GET['wpcfs'])
         ? sanitize_text_field(wp_unslash($_GET['wpcfs']))
         : '';
+// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
         if ($submitted === (string) $submit_id) {
+            // phpcs:disable WordPress.Security.NonceVerification.Recommended
             return stripslashes_deep(wp_unslash($_GET));
+            // phpcs:enable WordPress.Security.NonceVerification.Recommended
         }
 
         return array();
@@ -43,23 +47,48 @@ class WPCFSSearchForm
                 try {
                     $config['class'] = wpcfs_instantiate_class($clsname);
                 } catch (WPCustomFieldsSearchClassException $e) {
-                    error_log("Legacy Search Modern - search_form.php " . $e->getMessage());
+                    if (defined('WP_DEBUG') && WP_DEBUG) {
+                        error_log( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+                            "Legacy Search Modern - search_form.php " . $e->getMessage()
+                        );
+                    }
+
                     continue;
                 }
                 $config['index'] = ++$index;
                 $config['html_name'] = "f$index";
                 $config['html_id'] = $form_id . '/' . $config['html_name'];
-                if ($config['class']->show_in_form) {
-                    array_push($components, $config);
+                if (
+                    isset($config['class']) &&
+                    is_object($config['class']) &&
+                    !empty($config['class']->show_in_form)
+                ) {
+                    $components[] = $config;
                 }
-                if (is_callable([$config['class'], 'renderHidden'])) {
-                    $hidden .= $config['class']->renderHidden($config, $query);
+
+                if (
+                    isset($config['class']) &&
+                    is_object($config['class']) &&
+                    is_callable(array($config['class'], 'renderHidden'))
+                ) {
+                    $hidden .= (string) $config['class']->renderHidden($config, $query);
                 }
+
             }
         }
 
-        $template_file = apply_filters("wpcfs_form_template", dirname(__FILE__) . '/templates/form.php', $data);
+        $template_file = apply_filters(
+            'wpcfs_form_template',
+            dirname(__FILE__) . '/templates/form.php',
+            $data
+        );
+
+        if (!is_string($template_file) || !file_exists($template_file)) {
+            $template_file = dirname(__FILE__) . '/templates/form.php';
+        }
+
         $hidden .= '<input type="hidden" name="wpcfs" value="' . esc_attr($submit_id) . '" />';
+
         $method = "get";
         $results_page = apply_filters("wpcfs_results_page", get_site_url(), $data);
 

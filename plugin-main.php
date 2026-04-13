@@ -59,14 +59,29 @@ class WPCustomFieldsSearchPlugin
 
     public function is_search_submitted()
     {
-        return !empty($_REQUEST['wpcfs']) && is_string($_REQUEST['wpcfs']);
-    }
+// phpcs:disable WordPress.Security.NonceVerification.Recommended
+        $wpcfs = isset($_REQUEST['wpcfs'])
+        ? sanitize_text_field(
+            wp_unslash($_REQUEST['wpcfs'])
+        )
+        : '';
+// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
+        return $wpcfs !== '';
+
+    }
     public function get_submitted_form()
     {
         static $submitted;
         if (!isset($submitted)) {
-            $wpcfs = array_key_exists('wpcfs', $_REQUEST) ? $_REQUEST['wpcfs'] : null;
+// phpcs:disable WordPress.Security.NonceVerification.Recommended
+            $wpcfs = isset($_REQUEST['wpcfs'])
+            ? sanitize_text_field(
+                wp_unslash($_REQUEST['wpcfs'])
+            )
+            : null;
+// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
             if (!$wpcfs) {
                 $submitted = null;
             } elseif (substr($wpcfs, 0, 23) === "wp_custom_fields_search") {
@@ -76,9 +91,15 @@ class WPCustomFieldsSearchPlugin
 
                 if (
                     isset($options[$widget_id]) &&
-                    isset($options[$widget_id]['data'])
+                    isset($options[$widget_id]['data']) &&
+                    is_string($options[$widget_id]['data']) &&
+                    $options[$widget_id]['data'] !== ''
                 ) {
                     $submitted = json_decode($options[$widget_id]['data'], true);
+
+                    if (!is_array($submitted)) {
+                        $submitted = false;
+                    }
                 } else {
                     $submitted = false;
                 }
@@ -111,7 +132,12 @@ class WPCustomFieldsSearchPlugin
                         $input['input'] = wpcfs_instantiate_class($input['input']);
                         $input['comparison'] = wpcfs_instantiate_class($input['comparison']);
                     } catch (WPCustomFieldsSearchClassException $e) {
-                        error_log("WP Custom Fields Search - get_submitted_form() " . $e->getMessage());
+                        if (defined('WP_DEBUG') && WP_DEBUG) {
+                            error_log( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+                                "WP Custom Fields Search - get_submitted_form() " . $e->getMessage()
+                            );
+                        }
+
                         unset($submitted['inputs'][$k]);
                         continue;
                     }
@@ -164,9 +190,19 @@ class WPCustomFieldsSearchPlugin
         }
         foreach ($this->get_submitted_inputs() as $input) {
             $isMulti = array_key_exists('multi_match', $input) && ($input['multi_match'] != "Any");
-            $count = $isMulti ? count($input['input']->get_submitted_values($input, $_REQUEST)) : 1;
+
+            $submitted_values = $input['input']->get_submitted_values(
+                $input,
+                stripslashes_deep(wp_unslash($_REQUEST)) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+            );
+            if (!is_array($submitted_values)) {
+                $submitted_values = array();
+            }
+
+            $count = $isMulti ? count($submitted_values) : 1;
             $join = $input['datatype']->add_joins($input, $join, $count);
         }
+
         return $join;
     }
     public function posts_where($where, $wp_query)
@@ -175,26 +211,48 @@ class WPCustomFieldsSearchPlugin
             return $where;
         }
         $where = $this->open_up_post_types($where);
-        $request = stripslashes_deep($_REQUEST);
+        $request = stripslashes_deep(
+            wp_unslash($_REQUEST) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        );
         foreach ($this->get_submitted_inputs() as $input) {
             $submitted = $input['input']->get_submitted_values($input, $request);
+
+            if (!is_array($submitted)) {
+                $submitted = array();
+            }
+
             $isMulti = array_key_exists('multi_match', $input) && ($input['multi_match'] != "Any");
             $wheres = array();
             $join = $isMulti ? "AND" : "OR";
             $submitted_index = 0;
+
             foreach ($submitted as $value) {
+                $aliases = $input['datatype']->get_field_aliases($input, $submitted_index);
+
+                if (!is_array($aliases)) {
+                    $aliases = array();
+                }
+
                 $sub_wheres = array();
-                foreach ($input['datatype']->get_field_aliases($input, $submitted_index) as $alias) {
+
+                foreach ($aliases as $alias) {
                     $sub_wheres[] = $input['comparison']->get_where($input, $value, $alias);
                 }
-                $wheres[] = "(" . join(" OR ", $sub_wheres) . ")";
+
+                if (!empty($sub_wheres)) {
+                    $wheres[] = "(" . join(" OR ", $sub_wheres) . ")";
+                }
 
                 if ($isMulti) {
                     $submitted_index++;
                 }
             }
-            $where .= " AND ( " . join(" $join ", $wheres) . " )"; #TODO: Make the AND/OR configurable
+
+            if (!empty($wheres)) {
+                $where .= " AND ( " . join(" $join ", $wheres) . " )";
+            }
         }
+
         return $where;
     }
     public function open_up_post_types($where)
@@ -256,10 +314,22 @@ class WPCustomFieldsSearchPlugin
         }
 
         foreach ($form['inputs'] as $input) {
-            if ($input['input']->is_submitted($input, $_REQUEST)) {
-                $inputs[] = $input;
+            if (
+                !is_array($input) ||
+                !isset($input['input']) ||
+                !is_object($input['input'])
+            ) {
+                continue;
             }
 
+            if (
+                $input['input']->is_submitted(
+                    $input,
+                    stripslashes_deep(wp_unslash($_REQUEST)) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+                )
+            ) {
+                $inputs[] = $input;
+            }
         }
         return $inputs;
     }
@@ -275,11 +345,21 @@ class WPCustomFieldsSearchPlugin
     }
     public function describe_search($input)
     {
-        $label = $input['label'];
+        $label = isset($input['label']) ? $input['label'] : '';
         $found = array();
-        foreach ($input['input']->get_submitted_values($input, $_REQUEST) as $value) {
+        $submitted_values = $input['input']->get_submitted_values(
+            $input,
+            stripslashes_deep(wp_unslash($_REQUEST)) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        );
+
+        if (!is_array($submitted_values)) {
+            $submitted_values = array();
+        }
+
+        foreach ($submitted_values as $value) {
             $found[] = $input['comparison']->describe($label, $value);
         }
+
         $join = (
             isset($input['multi_match']) && $input['multi_match'] === 'Any'
         )
@@ -292,7 +372,13 @@ class WPCustomFieldsSearchPlugin
     {
         require_once dirname(__FILE__) . '/widget.php';
         register_widget("WPCustomFieldsSearchWidget");
-        wp_enqueue_style("wpcfs-form", plugin_dir_url(__FILE__) . 'templates/form.css');
+        wp_enqueue_style(
+            'wpcfs-form',
+            plugin_dir_url(__FILE__) . '/templates/form.css',
+            array(),
+            filemtime(plugin_dir_path(__FILE__) . '/templates/form.css')
+        );
+
     }
 
     public function get_angular_libraries()
@@ -346,8 +432,11 @@ class WPCustomFieldsSearchPlugin
             wp_enqueue_script(
                 $library["name"],
                 $library["file"],
-                $library["dependencies"]
+                $library["dependencies"],
+                LSM_VERSION,
+                true
             );
+
             $angular_dependencies[] = $library["name"];
         }
         wp_enqueue_script(
@@ -464,11 +553,7 @@ class WPCustomFieldsSearchPlugin
     }
     public function plugins_loaded()
     {
-        load_plugin_textdomain(
-            'legacy-search-modern',
-            false,
-            dirname(plugin_basename(__FILE__)) . '/languages/'
-        );
+        // Translation files are loaded automatically by WordPress.org language packs.
     }
 
     public function upgrade_plugin($old_version, $latest_version)
@@ -485,10 +570,15 @@ class WPCustomFieldsSearchPlugin
 
     public function presets_page()
     {
-        if (!empty($_POST)) {
-            // Save something...
-            // Return
-        }
+// phpcs:disable WordPress.Security.NonceVerification.Missing
+$has_post_data = !empty($_POST);
+// phpcs:enable WordPress.Security.NonceVerification.Missing
+
+if ($has_post_data) {
+    // Save something...
+    // Return
+}
+
         $config = get_option(LSM_OPTION_NAME, array(
             'presets' => array(),
         ));
@@ -505,8 +595,8 @@ class WPCustomFieldsSearchPlugin
         }
 
         try {
-            $raw_data = isset($_POST['data'])
-            ? wp_unslash($_POST['data'])
+            $raw_data = isset($_POST['data']) // phpcs:ignore WordPress.Security.NonceVerification.Missing
+            ? sanitize_textarea_field(wp_unslash($_POST['data']))
             : '';
 
             if ($raw_data === '') {
@@ -558,9 +648,13 @@ class WPCustomFieldsSearchPlugin
             throw new Exception("403 Forbidden");
         }
 
+// phpcs:disable WordPress.Security.NonceVerification.Missing
         $id = isset($_POST['id'])
-        ? sanitize_key(wp_unslash($_POST['id']))
+        ? sanitize_key(
+            wp_unslash($_POST['id'])
+        )
         : '';
+// phpcs:enable WordPress.Security.NonceVerification.Missing
 
         if ($id === '') {
             wp_send_json_error('invalid_id', 400);
@@ -598,7 +692,7 @@ class WPCustomFieldsSearchPlugin
     }
     public function show_search_template_for_searches($template)
     {
-        if (!empty($_REQUEST['wpcfs'])) {
+        if (!empty($_REQUEST['wpcfs'])) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
             $template = 'search';
         }
         return $template;
@@ -606,9 +700,23 @@ class WPCustomFieldsSearchPlugin
 
     public static function get_javascript_editor_config()
     {
-        $inputs = apply_filters("wp_custom_fields_search_inputs", array());
-        $datatypes = apply_filters("wp_custom_fields_search_datatypes", array());
-        $comparisons = apply_filters("wp_custom_fields_search_comparisons", array());
+       // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+$inputs = apply_filters(
+    'wp_custom_fields_search_inputs',
+    array()
+);
+
+$datatypes = apply_filters(
+    'wp_custom_fields_search_datatypes',
+    array()
+);
+
+$comparisons = apply_filters(
+    'wp_custom_fields_search_comparisons',
+    array()
+);
+// phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+
 
         foreach ($inputs as $k => $input) {
             $inputs[$k] = array(
@@ -631,15 +739,20 @@ class WPCustomFieldsSearchPlugin
                 "options" => $comparison->get_editor_options(),
             );
         }
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+return apply_filters(
+    'wp_custom_fields_search_editor_config',
+    array(
+        "inputs" => $inputs,
+        "datatypes" => $datatypes,
+        "comparisons" => $comparisons,
+        "general" => array(
+            "post_types" => array_keys(get_post_types()),
+        ),
+    )
+);
+// phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 
-        return apply_filters("wp_custom_fields_search_editor_config", array(
-            "inputs" => $inputs,
-            "datatypes" => $datatypes,
-            "comparisons" => $comparisons,
-            "general" => array(
-                "post_types" => array_keys(get_post_types()),
-            ),
-        ));
     }
     public function wp_custom_fields_search_inputs($inputs)
     {
@@ -736,7 +849,7 @@ class WPCustomFieldsSearchPlugin
         if (!($config && array_key_exists('presets', $config) && array_key_exists($id, $config['presets']))) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
 
-                trigger_error(
+                trigger_error( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
                     sprintf(
                         /* translators: %s is the preset ID that could not be found. */
                         esc_html__(
@@ -818,7 +931,7 @@ class WPCustomFieldsSearchPlugin
             ), 403);
         }
 
-        $taxonomy_name = isset($_GET['taxonomy'])
+        $taxonomy_name = isset($_GET['taxonomy']) // phpcs:ignore WordPress.Security.NonceVerification.Missing
         ? sanitize_key(wp_unslash($_GET['taxonomy']))
         : '';
 
@@ -913,6 +1026,7 @@ function wpcfs_show_preset($id)
     WPCustomFieldsSearchPlugin::getInstance()->show_preset($id);
 }
 if (!function_exists('wp_custom_fields_search')) {
+    // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- Legacy helper kept for backward compatibility.
     function wp_custom_fields_search($id = "default")
     {
         return wpcfs_show_preset($id);

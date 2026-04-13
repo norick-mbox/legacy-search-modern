@@ -34,22 +34,61 @@ class WPCustomFieldsSearchWidget extends WP_Widget
 
     public function get_query_if_submitted($instance)
     {
-        if (!empty($_GET['wpcfs']) && $_GET['wpcfs'] === $instance['widget_id']) {
-            return $_GET;
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended
+        $submitted = isset($_GET['wpcfs'])
+        ? sanitize_text_field(wp_unslash($_GET['wpcfs']))
+        : '';
+// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+        $widget_id = (
+            is_array($instance) &&
+            isset($instance['widget_id'])
+        )
+        ? (string) $instance['widget_id']
+        : '';
+
+        if ($submitted !== '' && $submitted === $widget_id) {
+            // phpcs:disable WordPress.Security.NonceVerification.Recommended
+            return stripslashes_deep(wp_unslash($_GET));
+            // phpcs:enable WordPress.Security.NonceVerification.Recommended
         }
+
+        return array();
+
     }
     public function widget($args, $instance)
     {
         require_once "search_form.php";
-        $data = json_decode($instance['data'], true);
-        WPCFSSearchForm::show_form($data, $args['widget_id'], $args);
+        $data_raw = isset($instance['data']) && is_string($instance['data'])
+        ? $instance['data']
+        : '';
+
+        $data = $data_raw !== ''
+        ? json_decode($data_raw, true)
+        : array();
+
+        if (!is_array($data)) {
+            $data = array();
+        }
+
+        $widget_id = isset($args['widget_id'])
+        ? $args['widget_id']
+        : '';
+
+        WPCFSSearchForm::show_form($data, $widget_id, $args);
+
     }
 
     public function update($new_instance, $old_instance)
     {
+        $data = isset($new_instance['data']) && is_string($new_instance['data'])
+        ? $new_instance['data']
+        : '';
+
         return array(
-            "data" => wpcfs_strip_hash_keys($new_instance['data']),
+            'data' => wpcfs_strip_hash_keys($data),
         );
+
     }
 
     public function form($instance)
@@ -57,12 +96,18 @@ class WPCustomFieldsSearchWidget extends WP_Widget
 
         $defaults = array();
 
-        $instance = array_merge($defaults, $instance);
+        $instance = is_array($instance)
+        ? array_merge($defaults, $instance)
+        : $defaults;
 
-        $settings_pages = apply_filters("wpcfs_settings_pages", array());
+        $settings_pages = apply_filters(
+            'wpcfs_settings_pages',
+            array()
+        );
 
         $form_id = $this->get_field_id('edit-form');
         $form_id_attr = esc_attr($form_id);
+        $form_id_js = esc_js($form_id);
         $field_name = esc_attr($this->get_field_name('data'));
         $plugin_root = esc_url(plugin_dir_url(__FILE__));
         $building_blocks_json = wp_json_encode(
@@ -78,10 +123,21 @@ class WPCustomFieldsSearchWidget extends WP_Widget
         $settings_pages_json = wp_json_encode($settings_pages);
 
         $default = "{inputs:[],settings:{}}";
-        $form_config = (array_key_exists('data', $instance) && $instance['data']) ? $instance['data'] : $default;
-        if (!json_decode($form_config)) {
+        $form_config = (
+            isset($instance['data']) &&
+            is_string($instance['data']) &&
+            $instance['data'] !== ''
+        )
+        ? $instance['data']
+        : $default;
+
+        $decoded_form_config = json_decode($form_config, true);
+
+        if (!is_array($decoded_form_config)) {
             $form_config2 = str_replace('""', '"', $form_config);
-            if (json_decode($form_config2)) {
+            $decoded_form_config2 = json_decode($form_config2, true);
+
+            if (is_array($decoded_form_config2)) {
                 $form_config = $form_config2;
             } else {
                 $form_config = $default;
@@ -90,7 +146,11 @@ class WPCustomFieldsSearchWidget extends WP_Widget
         }
         include dirname(__FILE__) . '/templates/unsupported-message.php';
         // TODO: Could this be implemented with is_active_sidebar???
-        if ($this->number == "__i__") {
+        $widget_number = property_exists($this, 'number')
+        ? $this->number
+        : null;
+
+        if ($widget_number === '__i__') {
             // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
             echo "
 				<div id='{$form_id_attr}' class='legacy-search-modern-form'>
@@ -123,7 +183,9 @@ class WPCustomFieldsSearchWidget extends WP_Widget
                     var __ = function(phrase){
                         return __translations[phrase]||phrase;
                     };
-                    jQuery.get(ajaxurl+'?action=wpcfs_ng_load_translations').then(function(data){
+                    jQuery.get(
+    ajaxurl + '?action=wpcfs_ng_load_translations&nonce=' + encodeURIComponent(wpcfsAdmin.adminNonce)
+).then(function(data){
                        __translations = data;
                         configure_forms();
                         jQuery('body').mouseup(function(){
@@ -138,18 +200,19 @@ class WPCustomFieldsSearchWidget extends WP_Widget
         } else {
             // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
             echo "
-        <div id='{$form_id_attr}' class='legacy-search-modern-form'>
-				</div>
-				<script>
-					jQuery('#$form_id').wpcfs_editor({
-						'form_config':$form_config,
-						'building_blocks': {$building_blocks_json},
-'settings_pages': {$settings_pages_json},
-						'field_name':'{$field_name}',
-                         'root':'{$plugin_root}'
-					});
-				</script>
-			";
+    <div id='{$form_id_attr}' class='legacy-search-modern-form'>
+    </div>
+    <script>
+        jQuery('#{$form_id_js}').wpcfs_editor({
+            'form_config':$form_config,
+            'building_blocks': {$building_blocks_json},
+            'settings_pages': {$settings_pages_json},
+            'field_name':'{$field_name}',
+            'root':'{$plugin_root}'
+        });
+    </script>
+";
+
         }
     }
 }

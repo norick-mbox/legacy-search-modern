@@ -3,26 +3,31 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-    echo $args['before_widget'];
-    if (
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Widget wrapper HTML is provided by WordPress core.
+echo $args['before_widget'];
+
+if (
     !empty($settings) &&
     !empty($settings['show_title'])
-    ) {
-// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+) {
+    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Widget title wrapper HTML is provided by WordPress core.
     echo $args['before_title'];
-    echo esc_html($settings['form_title'] ?? '');
-// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-    echo $args['after_title'];
-    }
 
+    echo esc_html($settings['form_title'] ?? '');
+
+    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Widget title wrapper HTML is provided by WordPress core.
+    echo $args['after_title'];
+}
 ?>
+
 <?php do_action('wpcfs-before-form')?>
 <form method="<?php echo esc_attr($method); ?>"
       action="<?php echo esc_url($results_page); ?>"
       class="wpcfs-search-form"
       id="<?php echo esc_attr($form_id); ?>">
-<?php foreach ((is_array($components) ? $components : array()) as $config):
+<?php 
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+foreach ((is_array($components) ? $components : array()) as $config) {
 
     $html_name = isset($config['html_name']) ? $config['html_name'] : '';
     $label = isset($config['label']) ? $config['label'] : '';
@@ -32,7 +37,7 @@ if (!defined('ABSPATH')) {
     )
     ? $config['class']->get_name()
     : '';
-
+// phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 ?>
 <div class="wpcfs-input-wrapper wpcfs-input-input <?php
                                                       echo esc_attr(

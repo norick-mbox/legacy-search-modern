@@ -18,7 +18,7 @@ class WPCustomFieldsSearch_Input
         $html_name = isset($options['html_name']) ? $options['html_name'] : '';
         $html_id = isset($options['html_id']) ? $options['html_id'] : '';
 
-        if (file_exists($template_file)) {
+        if (is_string($template_file) && file_exists($template_file)) {
             include $template_file;
         }
     }
@@ -61,7 +61,13 @@ class WPCustomFieldsSearch_Input
     public function get_submitted_values($options, $data)
     {
         $value = $this->get_submitted_value($options, $data);
-        return (is_array($value)) ? $value : array($value);
+
+        if ($value === null || $value === '') {
+            return array();
+        }
+
+        return is_array($value) ? $value : array($value);
+
     }
 }
 
@@ -127,9 +133,18 @@ class WPCustomFieldsSearch_DataType
     public function _array_to_suggestions_list($array)
     {
         $return = array();
-        foreach ($array as $value) {
-            $return[] = array("value" => $value, "label" => $value);
+
+        if (!is_array($array)) {
+            return $return;
         }
+
+        foreach ($array as $value) {
+            $return[] = array(
+                'value' => $value,
+                'label' => $value,
+            );
+        }
+
         return $return;
     }
 }

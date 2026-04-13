@@ -89,7 +89,7 @@ class WPCustomFieldsSearch_Range extends WPCustomFieldsSearch_OrderedComparison
 
             if (defined('WP_DEBUG') && WP_DEBUG) {
 
-                trigger_error(
+                trigger_error( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
                     sprintf(
                         /* translators: %s is the invalid range value entered by the user. */
                         esc_html__(

@@ -24,6 +24,7 @@ if (!defined('LSM_LEGACY_OPTION_KEY')) {
 /**
  * Try to deactivate the original plugin before loading this plugin's main code.
  */
+// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- Legacy compatibility helper.
 function lsm_try_deactivate_legacy_plugin_early()
 {
     if (!is_admin()) {

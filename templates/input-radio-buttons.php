@@ -3,6 +3,7 @@
 if (!defined('ABSPATH')) {
     exit;
 }
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 
 $current = isset($query[$html_name]) ? (string) $query[$html_name] : '';
 
@@ -30,4 +31,5 @@ if (!empty($options['options']) && is_array($options['options'])) :
     endforeach;
 endif;
 ?>
+<?php // phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound ?>
 </ul>

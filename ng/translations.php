@@ -3,7 +3,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-        $translations = array( "Cannot restrict by type {type} in {comparison}" => __("Cannot restrict by type {type} in {comparison}","legacy-search-modern"),/*ng//js/app.js */
+// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Translation array local to this file.
+$translations = array( "Cannot restrict by type {type} in {comparison}" => __("Cannot restrict by type {type} in {comparison}","legacy-search-modern"),/*ng//js/app.js */
  "Show All Post Types" => __("Show All Post Types","legacy-search-modern"),/*ng//js/app.js */
  "Untitled Preset" => __("Untitled Preset","legacy-search-modern"),/*ng//js/app.js */
  /* translators: %s is the preset name. */
