@@ -27,7 +27,7 @@ if (
       id="<?php echo esc_attr($form_id); ?>">
 <?php 
 // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
-foreach ((is_array($components) ? $components : array()) as $config) {
+foreach ((is_array($components) ? $components : array()) as $config) :
 
     $html_name = isset($config['html_name']) ? $config['html_name'] : '';
     $label = isset($config['label']) ? $config['label'] : '';
@@ -37,7 +37,6 @@ foreach ((is_array($components) ? $components : array()) as $config) {
     )
     ? $config['class']->get_name()
     : '';
-// phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 ?>
 <div class="wpcfs-input-wrapper wpcfs-input-input <?php
                                                       echo esc_attr(
@@ -57,13 +56,19 @@ foreach ((is_array($components) ? $components : array()) as $config) {
         ?>
     </div>
 </div>
-<?php endforeach; ?>
+<?php
+endforeach;
+// phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+?>
 
 <div class='wpcfs-input-wrapper wpcfs-input-submit'>
     <input type="submit" value="<?php echo esc_attr(__('Search', 'legacy-search-modern')); ?>">
 </div>
 
-<?php echo wp_kses_post($hidden); ?>
+<?php
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Hidden inputs are generated internally by the plugin.
+echo $hidden; ?>
+
 
 </form>
 <?php do_action('wpcfs-after-form')?>

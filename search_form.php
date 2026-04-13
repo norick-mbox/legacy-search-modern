@@ -92,7 +92,22 @@ class WPCFSSearchForm
         $method = "get";
         $results_page = apply_filters("wpcfs_results_page", get_site_url(), $data);
 
-        $hidden = apply_filters("wpcfs_hidden_elements", $hidden, array("data" => $data, "form_id" => $form_id));
+        $hidden = apply_filters(
+            'wpcfs_hidden_elements',
+            $hidden,
+            array(
+                'data' => $data,
+                'form_id' => $form_id,
+            )
+        );
+
+        if (
+            strpos($hidden, 'name="wpcfs"') === false
+            && strpos($hidden, "name='wpcfs'") === false
+        ) {
+            $hidden .= '<input type="hidden" name="wpcfs" value="' . esc_attr($submit_id) . '" />';
+        }
+
         $settings = isset($data['settings']) && is_array($data['settings'])
         ? $data['settings']
         : array();
