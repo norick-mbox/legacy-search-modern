@@ -65,8 +65,7 @@ class WPCustomFieldsSearch_PostField extends WPCustomFieldsSearch_DataType
         switch ($field) {
 
             case 'post_title':case 'post_date':case 'post_content':case 'post_excerpt':case 'all':
-                $map = $this->getFieldMap();
-                trigger_error(__("Cannot auto-populate select for ", "legacy-search-modern") . $map[$field]);
+
                 return array();
             case 'post_author':
                 $q = $wpdb->get_results(
@@ -76,7 +75,9 @@ class WPCustomFieldsSearch_PostField extends WPCustomFieldsSearch_DataType
                     )
                 );
 
-                $author_id = !empty($q[0]->post_author) ? (int) $q[0]->post_author : 0;
+                $author_id = !empty($q[0]->post_author)
+                ? (int) $q[0]->post_author
+                : 0;
 
                 $authors = $wpdb->get_results(
                     $wpdb->prepare(
@@ -91,7 +92,12 @@ class WPCustomFieldsSearch_PostField extends WPCustomFieldsSearch_DataType
                 }
                 return $response;
             case 'post_type':
-                return $this->_array_to_suggestions_list($wpdb->get_col($wpdb->prepare("SELECT DISTINCT post_type FROM $wpdb->posts WHERE post_status='publish'", array())));
+                return $this->_array_to_suggestions_list(
+                    $wpdb->get_col(
+                        "SELECT DISTINCT post_type FROM {$wpdb->posts} WHERE post_status = 'publish'"
+                    )
+                );
+
         }
     }
     public function get_editor_options()

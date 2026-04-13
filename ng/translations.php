@@ -6,6 +6,7 @@ if (!defined('ABSPATH')) {
         $translations = array( "Cannot restrict by type {type} in {comparison}" => __("Cannot restrict by type {type} in {comparison}","legacy-search-modern"),/*ng//js/app.js */
  "Show All Post Types" => __("Show All Post Types","legacy-search-modern"),/*ng//js/app.js */
  "Untitled Preset" => __("Untitled Preset","legacy-search-modern"),/*ng//js/app.js */
+ /* translators: %s is the preset name. */
  "Are you sure you want to delete this preset '%s'?" => __("Are you sure you want to delete this preset '%s'?","legacy-search-modern"),/*ng//js/app.js */
  "There is currently no import functionality, the settings export is for debug use only" => __("There is currently no import functionality, the settings export is for debug use only","legacy-search-modern"),/*ng//js/app.js */
  "Alphabetical" => __("Alphabetical","legacy-search-modern"),/*ng//partials/comparisons/numeric.html */

@@ -12,8 +12,6 @@ if (!defined('LSM_OPTION_NAME')) {
     define('LSM_OPTION_NAME', 'legacy_search_modern_options');
 }
 
-
-
 class WPCustomFieldsSearchValidationException extends Exception
 {}
 class WPCustomFieldsSearchPlugin
@@ -544,11 +542,11 @@ class WPCustomFieldsSearchPlugin
             echo "OK";
         } catch (WPCustomFieldsSearchValidationException $e) {
             header("HTTP/1.1 400 Invalid Data");
-            echo esc_html( 'Error: ' . $e->getMessage() );
+            echo esc_html('Error: ' . $e->getMessage());
             throw $e;
         } catch (Exception $e) {
             header("HTTP/1.1 500 Internal Error");
-            echo esc_html( 'Error: ' . $e->getMessage() );
+            echo esc_html('Error: ' . $e->getMessage());
             throw $e;
         }
     }
@@ -736,7 +734,21 @@ class WPCustomFieldsSearchPlugin
         ));
 
         if (!($config && array_key_exists('presets', $config) && array_key_exists($id, $config['presets']))) {
-            trigger_error(__("No Such Preset", "legacy-search-modern") . " " . $id);
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+
+                trigger_error(
+                    sprintf(
+                        /* translators: %s is the preset ID that could not be found. */
+                        esc_html__(
+                            "Preset '%s' not found",
+                            'legacy-search-modern'
+                        ),
+                        esc_html($id)
+                    ),
+                    E_USER_WARNING
+                );
+
+            }
 
             return;
         }

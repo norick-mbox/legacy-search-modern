@@ -3,14 +3,16 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
     echo $args['before_widget'];
     if (
     !empty($settings) &&
     !empty($settings['show_title'])
     ) {
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
     echo $args['before_title'];
     echo esc_html($settings['form_title'] ?? '');
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
     echo $args['after_title'];
     }
 
@@ -60,4 +62,6 @@ if (!defined('ABSPATH')) {
 
 </form>
 <?php do_action('wpcfs-after-form')?>
-<?php echo $args['after_widget'] ?>
+<?php
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+echo $args['after_widget']; ?>

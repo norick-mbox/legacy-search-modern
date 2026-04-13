@@ -89,9 +89,9 @@ class WPCustomFieldsSearch_Range extends WPCustomFieldsSearch_OrderedComparison
 
             if (defined('WP_DEBUG') && WP_DEBUG) {
 
-                /* translators: %s is the invalid range value entered by the user. */
                 trigger_error(
                     sprintf(
+                        /* translators: %s is the invalid range value entered by the user. */
                         esc_html__(
                             "Range format should be '<min>:<max>' received '%s'",
                             'legacy-search-modern'
@@ -100,6 +100,7 @@ class WPCustomFieldsSearch_Range extends WPCustomFieldsSearch_OrderedComparison
                     ),
                     E_USER_WARNING
                 );
+
             }
 
             if (count($range) === 1) {
