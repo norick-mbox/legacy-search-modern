@@ -11,6 +11,17 @@ License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
  */
 
+require_once __DIR__ . '/vendor/plugin-update-checker/plugin-update-checker.php';
+
+use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
+
+$updateChecker = PucFactory::buildUpdateChecker(
+    'https://github.com/norick-mbox/legacy-search-modern',
+    __FILE__,
+    'legacy-search-modern'
+);
+
+
 
 if (!defined('ABSPATH')) {
     exit;
