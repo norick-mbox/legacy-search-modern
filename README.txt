@@ -4,7 +4,7 @@ Tags: search, custom fields, filter, shortcode, compatibility
 Requires at least: 6.7
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: http://www.apache.org/licenses/LICENSE-2.0
 Import-compatible modern fork of WP Custom Fields Search for WordPress 6.7 and PHP 8.2+.
@@ -229,7 +229,7 @@ If the posts do display elsewhere on your public facing site but not in the wpcf
 
 == Changelog ==
 
-= 1.0.0 =
+= 1.0.1 =
 * First release of Legacy Search Modern
 * Added import from WP Custom Fields Search
 * Added compatibility with existing presets, shortcodes and GET parameters

@@ -2,7 +2,9 @@
 /*
 Plugin Name: Legacy Search Modern
 Description: Modernized fork of WP Custom Fields Search
-Version: 1.0.0
+Author URI: https: //plugins.norick-mbox.com/
+Plugin URI: https://github.com/norick-mbox/legacy-search-modern
+Version: 1.0.1
 Author: norick-mbox
 Text Domain: legacy-search-modern
 License: GPLv2 or later
