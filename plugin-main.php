@@ -5,7 +5,7 @@ if (!defined('ABSPATH')) {
 
 require_once dirname(__FILE__) . '/functions.php';
 if (!defined('LSM_VERSION')) {
-    define('LSM_VERSION', '1.0.1');
+    define('LSM_VERSION', '1.0.2');
 }
 
 if (!defined('LSM_OPTION_NAME')) {
@@ -524,7 +524,7 @@ class WPCustomFieldsSearchPlugin
             filemtime(plugin_dir_path(__FILE__) . 'ng/css/editor.css')
         );
 
-        wp_register_style('wpcfs_css', plugin_dir_url(__FILE__) . 'ng/css/editor.css', false, '1.0.1');
+        wp_register_style('wpcfs_css', plugin_dir_url(__FILE__) . 'ng/css/editor.css', false, '1.0.2');
         wp_register_style('wpcfs_bootstrap_css', plugin_dir_url(__FILE__) . 'ng/css/bootstrap-contained.css', false, '4.0.0');
         wp_enqueue_style('wpcfs_css');
         wp_enqueue_style('wpcfs_bootstrap_css');

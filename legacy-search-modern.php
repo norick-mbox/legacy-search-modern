@@ -2,9 +2,9 @@
 /*
 Plugin Name: Legacy Search Modern
 Description: Modernized fork of WP Custom Fields Search
-Author URI: https: //plugins.norick-mbox.com/
+Author URI: https://plugins.norick-mbox.com/
 Plugin URI: https://github.com/norick-mbox/legacy-search-modern
-Version: 1.0.1
+Version: 1.0.2
 Author: norick-mbox
 Text Domain: legacy-search-modern
 License: GPLv2 or later
@@ -20,6 +20,8 @@ $updateChecker = PucFactory::buildUpdateChecker(
     __FILE__,
     'legacy-search-modern'
 );
+
+$updateChecker->setBranch('main');
 
 
 
